@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clarietta</title>
+    <style>@import url("https://use.typekit.net/bkd5uaz.css");</style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        html, body { margin: 0; background: black; color: white; scroll-behavior: smooth; }
+
+        .font-title    { font-family: "aktiv-grotesk", sans-serif; font-weight: 400; font-size: 5vw; line-height: 1; letter-spacing: -0.02em; }
+        .font-subtitle { font-family: "aktiv-grotesk", sans-serif; font-weight: 400; font-size: 1vw; line-height: 1; letter-spacing: -0.01em; }
+        @media (max-width: 1024px) {
+            .font-subtitle { font-size: 2vw !important; }
+            .font-title   { font-size: 17vw !important;  }
+        }
+
+        .scramble-char { display: inline-block; }
+        .nav-active { color: #fff !important; }
+
+        #hamburger span { transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s ease; }
+        #hamburger.is-open span:nth-child(1) { transform: translateY(6px) rotate(45deg); background: #fff; }
+        #hamburger.is-open span:nth-child(2) { opacity: 0; }
+        #hamburger.is-open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); background: #fff; }
+
+
+        /* ══ Loader ══ */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: black;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+        #loader.is-done {
+            transition: opacity 0.6s ease;
+            opacity: 0;
+        }
+        #mobile-menu { transition: opacity 0.35s ease; }
+        #mobile-menu.is-open { opacity: 1; pointer-events: auto; }
+
+    	/* evidenzia testo con mouse :) */
+		::selection {
+			background: #CCFF00;
+			color: #000;
+		}
+		::-moz-selection {
+			background: #CCFF00;
+			color: #000;
+		}
+    </style>
+</head>
+
+<body class="antialiased">
+
+    <!-- ── Loader ── -->
+    <div id="loader">
+        <div id="loader-counter" class="font-subtitle">0</div>
+    </div>
+
+	<!-- ── Header desktop ── -->
+    <header class="font-subtitle hidden md:grid grid-cols-3 fixed top-0 left-0 w-full h-[60px] items-center z-[9999]">
+        <nav class="pl-8">
+            <div class="flex items-center gap-10 text-white/50">
+                <a href="projects.html" data-nav="projects" class="font-subtitle hover:text-white transition-colors duration-200">PROJECTS</a>
+                <a href="gallery.html" data-nav="gallery"  class="font-subtitle hover:text-white transition-colors duration-200">GALLERY</a>
+            </div>
+        </nav>
+        <h1 class="text-center">
+            <a href="index.html" data-nav="home" class="font-subtitle inline-block">CLARIETTA</a>
+        </h1>
+        <nav class="pr-8 flex justify-end">
+            <div class="flex items-center gap-10 text-white/50">
+                <a href="about.html" data-nav="about" class="font-subtitle hover:text-white transition-colors duration-200">ABOUT</a>
+                <a href="contact.html" data-nav="contact" class="font-subtitle hover:text-white transition-colors duration-200">CONTACT</a>
+            </div>
+        </nav>
+    </header>
+
+
+ <!-- ── Header mobile ── -->
+<header class="md:hidden fixed top-0 left-0 w-full h-[52px] flex items-center px-5 z-[10002]">
+        <a href="index.html" data-nav="home" class="!font-subtitle absolute left-1/2 -translate-x-1/2">CLARIETTA</a>
+    <button id="hamburger" aria-label="Menu"
+            class="ml-auto flex flex-col gap-[5px] cursor-pointer p-2 z-[10001] bg-transparent border-0">
+        <span class="block w-[22px] h-px bg-white/60"></span>
+        <span class="block w-[22px] h-px bg-white/60"></span>
+        <span class="block w-[22px] h-px bg-white/60"></span>
+    </button>
+</header>
+
+<div id="mobile-menu" role="dialog" aria-modal="true"
+    class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-start gap-3 opacity-0 pointer-events-none">
+    <a href="index.html"    data-nav="home"     class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">HOME</a>
+    <a href="projects.html" data-nav="projects" class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">PROJECTS</a>
+    <a href="gallery.html"  data-nav="gallery"  class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">GALLERY</a>
+    <a href="about.html"    data-nav="about"    class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">ABOUT</a>
+    <a href="contact.html"  data-nav="contact"  class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">CONTACT</a>
+</div>
+
+    <!-- ── Hero ── -->
+    <section id="hero" class="h-screen flex justify-center items-end pb-0.5 px-3">
+        <div class="flex flex-col w-full max-w-[100vw]">
+            <div id="hero-title" class="font-title text-[15vw] relative leading-[0.9] z-[100]" style="opacity:0"></div>
+
+      <div class="flex justify-start items-center w-full gap-5 pb-3 mt-8 md:mt-0">
+	<!-- Instagram -->
+	<a href="https://www.instagram.com/clariettaa?igsh=dDBoMndqNGRxNGgz" target="_blank" rel="noopener noreferrer" class="hover:opacity-70 transition-opacity z-[100]">
+		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 md:w-7 md:h-7">
+			<rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+			<path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+			<line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+		</svg>
+	</a>
+
+	<!-- LinkedIn -->
+	<a href="https://www.linkedin.com/in/clara-corti-502a0b3a8?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" rel="noopener noreferrer" class="hover:opacity-70 transition-opacity z-[100]">
+		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 md:w-7 md:h-7">
+			<rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+			<line x1="7" y1="10" x2="7" y2="17"></line>
+			<line x1="7" y1="6.5" x2="7" y2="6.51"></line>
+			<path d="M11 17v-4.5a2.5 2.5 0 0 1 5 0V17"></path>
+			<line x1="11" y1="10" x2="11" y2="17"></line>
+		</svg>
+	</a>
+
+	<!-- Gmail -->
+	<a href="mailto:clarietta.gd@gmail.com" class="hover:opacity-70 transition-opacity z-[100]">
+		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 md:w-7 md:h-7">
+			<rect x="2" y="4" width="20" height="16" rx="3" ry="3"></rect>
+			<path d="M2 6.5l10 7 10-7"></path>
+		</svg>
+	</a>
+
+	<footer class="font-subtitle uppercase text-right text-[0.7rem] sm:text-xs z-[100] text-white/70 ml-auto">
+		© 2026 Clarietta - All Rights Reserved
+	</footer>
+</div>
+
+    </section>
+
+<script>
+    /* ══ Loader + animazione titolo ══ */
+    (() => {
+        const loader  = document.getElementById('loader');
+        const counter = document.getElementById('loader-counter');
+        const titleEl = document.getElementById('hero-title');
+
+        // Due righe: "THIS IS" e "CLARIETTA", ognuna con le lettere splittate
+        const lines = ['THIS IS', 'CLARIETTA'];
+        titleEl.innerHTML = lines.map(line =>
+            '<div style="display:block">' +
+            line.split('').map(ch =>
+                ch === ' '
+                    ? '<span class="tl" style="display:inline-block;width:0.35em">&nbsp;</span>'
+                    : `<span class="tl" style="opacity:0;display:inline-block">${ch}</span>`
+            ).join('') +
+            '</div>'
+        ).join('');
+
+        const letters = titleEl.querySelectorAll('.tl');
+
+        // Durata totale: 2000–3000ms random
+        const duration = 2000 + Math.random() * 1000;
+        const start    = performance.now();
+
+        // Counter da 0 a 100
+        const tick = (now) => {
+            const elapsed  = now - start;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Curva ease-out per il counter
+            const eased = 1 - Math.pow(1 - progress, 2);
+            counter.textContent = Math.floor(eased * 100);
+
+            if (progress < 1) {
+                requestAnimationFrame(tick);
+            } else {
+                counter.textContent = '100';
+                // Fade out loader
+                loader.classList.add('is-done');
+                loader.addEventListener('transitionend', () => loader.remove(), { once: true });
+
+                // Mostra il titolo e anima lettera per lettera con GSAP
+                titleEl.style.opacity = '1';
+                gsap.fromTo(letters,
+                    { opacity: 0, y: 8 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.04,
+                        stagger: 0.055,
+                        ease: 'power2.out',
+                        delay: 0.1
+                    }
+                );
+            }
+        };
+        requestAnimationFrame(tick);
+    })();
+
+    /* ══ Spawning immagini sull'hero ══ */
+    (() => {
+        const hero = document.getElementById('hero');
+        if (!hero) return;
+
+        const imgs = [
+            'images/fine-art/fine-art-13.webp',
+            'images/fine-art/fine-art-01.webp',
+            'images/fine-art/fine-art-02.webp',
+            'images/portraits/portraits-13.webp',
+            'images/fine-art/fine-art-03.webp',
+            'images/fine-art/fine-art-04.webp',
+            'images/fine-art/fine-art-05.webp',
+            'images/portraits/portraits-22.webp',
+            'images/fine-art/fine-art-06.webp',
+            'images/fine-art/fine-art-07.webp',
+            'images/portraits/portraits-02.webp',
+            'images/fine-art/fine-art-08.webp',
+            'images/fine-art/fine-art-09.webp',
+            'images/portraits/portraits-21.webp',
+            'images/fine-art/fine-art-10.webp',
+            'images/fine-art/fine-art-11.webp',
+            'images/fine-art/fine-art-12.webp'
+        ];
+        imgs.forEach(src => (new Image()).src = src);
+
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:50;contain:layout style paint';
+        document.body.appendChild(wrap);
+
+       // Larghezza fissa in vw, altezza automatica per rispettare le proporzioni originali dell'immagine
+        const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+        const imgWidthVw = isTouchDevice ? '55vw' : '25vw';
+
+        const pool = Array.from({ length: 5 }, () => {
+            const el = document.createElement('img');
+            el.style.cssText = `position:absolute;width:${imgWidthVw};height:auto;pointer-events:none;opacity:0;will-change:transform,opacity;transform:translate(-50%,-50%)`;
+            wrap.appendChild(el);
+            return { el, t: null };
+        });
+
+        let pi = 0, ii = 0, last = 0;
+
+        const spawn = (x, y) => {
+            const now = performance.now();
+            if (now - last < 170) return;
+            last = now;
+
+            const item = pool[pi]; pi = (pi + 1) % pool.length;
+            clearTimeout(item.t);
+
+            const el = item.el;
+            el.src = imgs[ii]; ii = (ii + 1) % imgs.length;
+            Object.assign(el.style, {
+                left: x + 'px', top: y + 'px',
+                opacity: '0', transform: 'translate(-50%,-50%)', transition: 'none'
+            });
+            void el.offsetWidth;
+
+            requestAnimationFrame(() => {
+                el.style.transition = 'opacity .3s cubic-bezier(.22,1,.36,1), transform .3s cubic-bezier(.22,1,.36,1)';
+                el.style.opacity = '1';
+            });
+
+            item.t = setTimeout(() => {
+                el.style.transition = 'opacity .5s cubic-bezier(.64,0,.78,0), transform .5s cubic-bezier(.64,0,.78,0)';
+                el.style.opacity = '0';
+                el.style.transform = 'translate(-50%,-50%) scale(.92)';
+            }, 400);
+        };
+
+        const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
+        if (isTouch) {
+            /* ── Touch/mobile: spawn automatico in posizioni casuali ── */
+            // Su mobile le immagini sono più grandi per essere visibili, altezza sempre automatica
+            pool.forEach(({ el }) => {
+                el.style.width  = '55vw';
+                el.style.height = 'auto';
+            });
+
+            const spawnRandom = () => {
+                // Margine per non uscire troppo dai bordi
+                const margin = 80;
+                const x = margin + Math.random() * (window.innerWidth  - margin * 2);
+                const y = margin + Math.random() * (window.innerHeight - margin * 2);
+                spawn(x, y);
+                // Intervallo variabile tra 700ms e 1600ms
+                setTimeout(spawnRandom, 700 + Math.random() * 900);
+            };
+
+            // Prima spawn dopo un breve delay iniziale
+            setTimeout(spawnRandom, 400);
+
+        } else {
+            /* ── Desktop: spawn al movimento del mouse ── */
+            hero.addEventListener('mousemove',  e => spawn(e.clientX, e.clientY), { passive: true });
+            hero.addEventListener('mouseleave', () => pool.forEach(({ el, t }) => {
+                clearTimeout(t);
+                el.style.opacity = '0';
+            }));
+        }
+    })();
+
+    /* ══ Navbar — stato attivo ══ */
+    (function setNavActive() {
+        const currentFile = window.location.pathname.split('/').pop() || 'index.html';
+        document.querySelectorAll('[data-nav]').forEach(link => {
+            const navKey = link.dataset.nav;
+            const isActive = navKey === 'home'
+                ? (currentFile === 'index.html' || currentFile === '')
+                : link.getAttribute('href').split('?')[0] === currentFile;
+            if (isActive) link.classList.add('nav-active');
+        });
+    })();
+
+    /* ══ Hamburger menu mobile ══ */
+    const hamburger  = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    hamburger.addEventListener('click', () => {
+        const open = hamburger.classList.toggle('is-open');
+        if (open) {
+            mobileMenu.classList.remove('hidden');
+            mobileMenu.classList.add('flex');
+        } else {
+            mobileMenu.classList.add('hidden');
+            mobileMenu.classList.remove('flex');
+        }
+        mobileMenu.classList.toggle('is-open', open);
+        document.body.style.overflow = open ? 'hidden' : '';
+    });
+
+    hamburger.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') hamburger.click();
+    });
+
+    mobileMenu.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', () => {
+            hamburger.classList.remove('is-open');
+            mobileMenu.classList.remove('is-open', 'flex');
+            mobileMenu.classList.add('hidden');
+            document.body.style.overflow = '';
+        });
+    });
+
+    /* ══ Scramble GSAP sui link desktop ══ */
+    (() => {
+        const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+        document.querySelectorAll('header:not(#mobile-menu) nav a').forEach(link => {
+            const original = link.textContent.trim();
+            let tween = null;
+
+            const buildSpans = (text) => {
+                link.innerHTML = '';
+                return text.split('').map(ch => {
+                    const span = document.createElement('span');
+                    span.className = 'scramble-char';
+                    span.textContent = ch;
+                    link.appendChild(span);
+                    return span;
+                });
+            };
+
+            buildSpans(original);
+
+            link.addEventListener('mouseenter', () => {
+                if (tween) tween.kill();
+                const spans = buildSpans(original);
+                spans.forEach((span, i) => {
+                    if (original[i] === ' ') return;
+                    const maxIter = 6 + Math.floor(Math.random() * 4);
+                    tween = gsap.to(span, {
+                        duration: 0.03,
+                        repeat: maxIter,
+                        delay: i * 0.025,
+                        onRepeat:   () => { span.textContent = CHARS[Math.floor(Math.random() * CHARS.length)]; },
+                        onComplete: () => { span.textContent = original[i]; }
+                    });
+                });
+            });
+        });
+    })();
+
+    /* ══ Click su CLARIETTA in home: scrolla all'hero invece di ricaricare ══ */
+    (() => {
+        const brandLink = document.querySelector('h1 a[data-nav="home"]');
+        if (!brandLink) return;
+        brandLink.addEventListener('click', e => {
+            const onIndex = window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/');
+            if (onIndex) {
+                e.preventDefault();
+                document.getElementById('hero')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    })();
+</script>
+
+</body>
+</html>

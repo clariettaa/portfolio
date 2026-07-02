@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clarietta — Projects</title>
+    <style>@import url("https://use.typekit.net/bkd5uaz.css");</style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollSmoother.min.js"></script>
+    <style>
+        html, body { margin: 0px; background: black; color: white; }
+
+        .font-title    { font-family: "aktiv-grotesk", sans-serif; font-weight: 400; font-size: 5vw; line-height: 1; letter-spacing: -0.02em; }
+        .font-subtitle { font-family: "aktiv-grotesk", sans-serif; font-weight: 400; font-size: 1vw;   line-height: 1; letter-spacing: -0.01em; }
+        @media (max-width: 1024px) {
+            .font-subtitle { font-size: 2vw !important; }
+            .font-title   { font-size: 10vw !important;  }
+        }
+
+        .scramble-char { display: inline-block; }
+        .nav-active    { color: #fff !important; }
+
+        /* ── Hamburger ── */
+        #hamburger span { transition: transform 0.3s ease, opacity 0.3s ease; }
+        #hamburger.is-open span:nth-child(1) { transform: translateY(6px) rotate(45deg);  }
+        #hamburger.is-open span:nth-child(2) { opacity: 0; }
+        #hamburger.is-open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+        #mobile-menu { transition: opacity 0.3s ease; }
+        #mobile-menu.is-open { opacity: 1; pointer-events: auto; }
+
+        /* ── ScrollSmoother wrapper: gli header restano fuori, quindi restano
+           davvero fixed sullo schermo; solo il contenuto viene smussato ── */
+        #smooth-wrapper { position: fixed; inset: 0; overflow: hidden; }
+        #smooth-content { width: 100%; }
+
+        /* ── Vista 1: scroll infinito ── */
+        #loop-wrap  { position: relative; width: 100%; height: 100vh; overflow: hidden; }
+        #loop-track { position: absolute; top: 0; left: 0; width: 100%; will-change: transform; }
+
+        .portfolio-item {
+            display: flex;
+            align-items: baseline;
+            gap: clamp(0.5rem, 1.5vw, 1.5rem);
+            color: white;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            padding: clamp(0.8rem, 1.5vw, 1.5rem) 0;
+            opacity: 0.2;
+            cursor: pointer;
+            transition: none; /* hover ISTANTANEO */
+            position: relative;
+            z-index: 2;
+        }
+        .portfolio-item:hover { opacity: 1; }
+        .portfolio-item .item-num { opacity: 0.4; transition: none; }
+        .portfolio-item:hover .item-num { opacity: 1; }
+
+        /* ── Preview fissa a destra ── */
+        #hover-preview {
+            position: fixed;
+            top: 50%; right: 5%;
+            transform: translateY(-50%);
+            width: clamp(50vw, 400px, 400px);
+            pointer-events: none;
+            opacity: 0;
+            transition: none; /* appare/sparisce ISTANTANEA */
+            border-radius: 2px;
+            overflow: hidden;
+            z-index: 1;
+        }
+        #hover-preview.visible { opacity: 1; }
+        #hover-preview img { width: 100%; height: auto; display: block; }
+
+        /* ── Vista 2: dettaglio categoria ── */
+        #detail-view {
+            position: fixed; inset: 0;
+            background: black;
+            z-index: 200;
+            overflow-y: auto;
+            opacity: 0; pointer-events: none;
+            transform: translateY(20px);
+            transition: opacity 0.45s ease, transform 0.45s ease;
+        }
+        #detail-view.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+        #detail-grid { columns: 2; column-gap: 1.2vw; }
+        @media (min-width: 800px) { #detail-grid { columns: 3; } }
+        #detail-grid img {
+            width: 100%; height: auto; display: block;
+            margin: 0 0 1.2vw;
+            break-inside: avoid; cursor: pointer;
+            transition: opacity 0.25s ease;
+        }
+        #detail-grid img:hover { transform: scale(0.98); }
+
+        /* ── Lightbox fullscreen ── */
+        #lightbox {
+            position: fixed; inset: 0; z-index: 8000;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0); opacity: 0; pointer-events: none;
+            transition: background .4s, opacity .4s;
+        }
+        #lightbox.is-open { background: rgba(0,0,0,.95); opacity: 1; pointer-events: auto; }
+        #lightbox img {
+            max-width: 90vw; max-height: 90vh; object-fit: contain;
+            transform: scale(.92); transition: transform .4s cubic-bezier(.22,1,.36,1);
+        }
+        #lightbox.is-open img { transform: scale(1); }
+
+        /* evidenzia testo con mouse :) */
+		::selection {
+			background: #CCFF00;
+			color: #000;
+		}
+		::-moz-selection {
+			background: #CCFF00;
+			color: #000;
+		}
+    </style>
+
+</head>
+<body class="antialiased">
+
+<div id="lightbox"><img id="lightbox-img" src="" alt=""></div>
+
+
+
+	<!-- ── Header desktop ── -->
+    <header class="font-subtitle hidden md:grid grid-cols-3 fixed top-0 left-0 w-full h-[60px] items-center z-[9999]">
+        <nav class="pl-8">
+            <div class="flex items-center gap-10 text-white/50">
+                <a href="projects.html" data-nav="projects" class="font-subtitle hover:text-white transition-colors duration-200">PROJECTS</a>
+                <a href="gallery.html" data-nav="gallery"  class="font-subtitle hover:text-white transition-colors duration-200">GALLERY</a>
+            </div>
+        </nav>
+        <h1 class="text-center">
+            <a href="index.html" data-nav="home" class="font-subtitle inline-block">CLARIETTA</a>
+        </h1>
+        <nav class="pr-8 flex justify-end">
+            <div class="flex items-center gap-10 text-white/50">
+                <a href="about.html" data-nav="about" class="font-subtitle hover:text-white transition-colors duration-200">ABOUT</a>
+                <a href="contact.html" data-nav="contact" class="font-subtitle hover:text-white transition-colors duration-200">CONTACT</a>
+            </div>
+        </nav>
+    </header>
+
+
+	<!-- ── Header desktop ── -->
+    <header class="font-subtitle hidden md:grid grid-cols-3 fixed top-0 left-0 w-full h-[60px] items-center z-[9999]">
+        <nav class="pl-8">
+            <div class="flex items-center gap-10 text-white/50">
+                <a href="projects.html" data-nav="projects" class="font-subtitle hover:text-white transition-colors duration-200">PROJECTS</a>
+                <a href="gallery.html" data-nav="gallery"  class="font-subtitle hover:text-white transition-colors duration-200">GALLERY</a>
+            </div>
+        </nav>
+        <h1 class="text-center">
+            <a href="index.html" data-nav="home" class="font-subtitle inline-block">CLARIETTA</a>
+        </h1>
+        <nav class="pr-8 flex justify-end">
+            <div class="flex items-center gap-10 text-white/50">
+                <a href="about.html" data-nav="about" class="font-subtitle hover:text-white transition-colors duration-200">ABOUT</a>
+                <a href="contact.html" data-nav="contact" class="font-subtitle hover:text-white transition-colors duration-200">CONTACT</a>
+            </div>
+        </nav>
+    </header>
+
+
+ <!-- ── Header mobile ── -->
+<header class="md:hidden fixed top-0 left-0 w-full h-[52px] flex items-center px-5 z-[10002]">
+        <a href="index.html" data-nav="home" class="!font-subtitle absolute left-1/2 -translate-x-1/2">CLARIETTA</a>
+    <button id="hamburger" aria-label="Menu"
+            class="ml-auto flex flex-col gap-[5px] cursor-pointer p-2 z-[10001] bg-transparent border-0">
+        <span class="block w-[22px] h-px bg-white/60"></span>
+        <span class="block w-[22px] h-px bg-white/60"></span>
+        <span class="block w-[22px] h-px bg-white/60"></span>
+    </button>
+</header>
+
+<div id="mobile-menu" role="dialog" aria-modal="true"
+    class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-start gap-3 opacity-0 pointer-events-none">
+    <a href="index.html"    data-nav="home"     class="font-title text-[10vw] text-white/30 hover:text-white transition-none">HOME</a>
+    <a href="projects.html" data-nav="projects" class="font-title text-[10vw] text-white/30 hover:text-white transition-none">PROJECTS</a>
+    <a href="gallery.html"  data-nav="gallery"  class="font-title text-[10vw] text-white/30 hover:text-white transition-none">GALLERY</a>
+    <a href="about.html"    data-nav="about"    class="font-title text-[10vw] text-white/30 hover:text-white transition-none">ABOUT</a>
+    <a href="contact.html"  data-nav="contact"  class="font-title text-[10vw] text-white/30 hover:text-white transition-none">CONTACT</a>
+</div>
+
+<!-- ══════════════════════════════════════
+     VISTA 1 — Lista scroll infinito
+     ══════════════════════════════════════ -->
+<div id="loop-wrap" class="pt-[52px] md:pt-[50px]">
+    <div id="loop-track" class="w-[88%] md:w-[80%] mx-auto p-1">
+        <a class="portfolio-item font-title" data-cat="landscape">LANDSCAPE</a>
+        <a class="portfolio-item font-title" data-cat="street">STREET</a>
+        <a class="portfolio-item font-title" data-cat="portraits">PORTRAITS</a>
+        <a class="portfolio-item font-title" data-cat="backstage">BACKSTAGE</a>
+        <a class="portfolio-item font-title" data-cat="fashion">FASHION</a>
+        <a class="portfolio-item font-title" data-cat="commercial">COMMERCIAL</a>
+        <a class="portfolio-item font-title" data-cat="fine-art">FINE ART</a>
+    </div>
+</div>
+
+<div id="hover-preview">
+    <img id="hover-preview-img" src="" alt="">
+</div>
+
+<!-- ══════════════════════════════════════
+     VISTA 2 — Dettaglio categoria
+     ══════════════════════════════════════ -->
+<div id="detail-view">
+    <section class="pt-24 pb-16 px-5 md:px-16">
+        <a id="detail-back" href="#"
+           class="font-subtitle text-white/50 hover:text-white transition-colors duration-200 inline-block mb-10">← BACK TO PROJECTS</a>
+
+        <div class="flex flex-col gap-2 mb-10">
+            <span id="detail-index" class="font-subtitle text-white/50"></span>
+            <h1 id="detail-title" class="font-title"></h1>
+        </div>
+
+        <div id="detail-grid"></div>
+
+        <div class="flex justify-between mt-16 font-subtitle text-white/50">
+            <a id="detail-prev" href="#" class="hover:text-white transition-colors duration-200"></a>
+            <a id="detail-next" href="#" class="hover:text-white transition-colors duration-200"></a>
+        </div>
+    </section>
+</div>
+
+</div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   DATI — generati da generate-projects.js
+   Rinomina i file con trattino: landscape-01.webp, landscape-02.webp …
+   poi esegui: node generate-projects.js
+   e incolla qui il risultato.
+   ══════════════════════════════════════════════════════════════════ */
+const PROJECTS = {
+    landscape: {
+        title: 'LANDSCAPE',
+        images: [
+            'images/landscape/landscape25.webp',
+            'images/landscape/moon-4.webp',
+            'images/landscape/landscape1.webp',
+            'images/landscape/landscape2.webp',
+            'images/landscape/landscape3.webp',
+            'images/landscape/landscape4.webp',
+            'images/landscape/landscape5.webp',
+            'images/landscape/landscape6.webp',
+            'images/landscape/landscape7.webp',
+            'images/landscape/landscape8.webp',
+            'images/landscape/landscape9.webp',
+            'images/landscape/landscape10.webp',
+            'images/landscape/landscape11.webp',
+            'images/landscape/landscape12.webp',
+            'images/landscape/moon-1.webp',
+            'images/landscape/landscape13.webp',
+            'images/landscape/landscape14.webp',
+            'images/landscape/landscape15.webp',
+            'images/landscape/landscape16.webp',
+            'images/landscape/landscape17.webp',
+            'images/landscape/moon-2.webp',
+            'images/landscape/landscape18.webp',
+            'images/landscape/landscape19.webp',
+            'images/landscape/landscape20.webp',
+            'images/landscape/landscape21.webp',
+            'images/landscape/landscape22.webp',
+            'images/landscape/moon-3.webp',
+            'images/landscape/landscape23.webp',
+            'images/landscape/landscape24.webp',
+            'images/landscape/landscape26.webp',
+            'images/landscape/landscape27.webp',
+            'images/landscape/moon-6.webp',
+            'images/landscape/landscape28.webp',
+            'images/landscape/landscape29.webp',
+            'images/landscape/moon-5.webp',
+        ]
+    },
+    street: {
+        title: 'STREET',
+        images: [
+            'images/street/street13.webp',
+            'images/street/street1.webp',
+            'images/street/street2.webp',   
+            'images/street/street3.webp',
+            'images/street/street4.webp',
+            'images/street/street5.webp',
+            'images/street/street6.webp',
+            'images/street/street7.webp',
+            'images/street/street8.webp',
+            'images/street/street9.webp',
+            'images/street/street10.webp',
+            'images/street/street11.webp',
+            'images/street/street12.webp',
+            'images/street/street14.webp',
+            'images/street/street15.webp',
+            'images/street/street16.webp',
+            'images/street/street17.webp',
+            'images/street/street18.webp',
+            'images/street/street19.webp',
+            'images/street/street20.webp',
+        ]
+    },
+    portraits: {
+        title: 'PORTRAITS', 
+        images: [
+            'images/portraits/PORTRAITS-02.webp',
+            'images/portraits/PORTRAITS-01.webp',
+            'images/portraits/PORTRAITS-03.webp',  
+            'images/portraits/PORTRAITS-04.webp',
+            'images/portraits/PORTRAITS-05.webp',
+            'images/portraits/PORTRAITS-06.webp',
+            'images/portraits/PORTRAITS-07.webp',
+            'images/portraits/PORTRAITS-08.webp',
+            'images/portraits/PORTRAITS-09.webp',
+            'images/portraits/PORTRAITS-10.webp',
+            'images/portraits/PORTRAITS-11.webp',
+            'images/portraits/PORTRAITS-12.webp',
+            'images/portraits/PORTRAITS-13.webp',
+            'images/portraits/PORTRAITS-14.webp',
+            'images/portraits/PORTRAITS-15.webp',
+            'images/portraits/PORTRAITS-16.webp',
+            'images/portraits/PORTRAITS-17.webp',
+            'images/portraits/PORTRAITS-18.webp',
+            'images/portraits/PORTRAITS-19.webp',
+            'images/portraits/PORTRAITS-20.webp',
+            'images/portraits/PORTRAITS-21.webp',
+            'images/portraits/PORTRAITS-22.webp',
+            'images/portraits/PORTRAITS-23.webp',
+            'images/portraits/PORTRAITS-24.webp',
+            'images/portraits/PORTRAITS-25.webp'
+            
+        ]
+    },
+    backstage:  {
+        title: 'BACKSTAGE',  
+        images: [
+            'images/backstage/backstage-03.webp',
+            'images/backstage/backstage-04.webp',
+            'images/backstage/backstage-06.webp',
+            'images/backstage/backstage-07.webp',
+            'images/backstage/backstage-08.webp',
+            'images/backstage/backstage-09.webp',
+            'images/backstage/backstage-10.webp',
+            'images/backstage/backstage-11.webp',
+            'images/backstage/backstage-12.webp',
+            'images/backstage/backstage-13.webp',
+            'images/backstage/backstage-14.webp',
+            'images/backstage/backstage-15.webp',
+            'images/backstage/backstage-16.webp',
+            'images/backstage/backstage-17.webp',
+            'images/backstage/backstage-18.webp',
+            'images/backstage/backstage-19.webp',
+            'images/backstage/backstage-20.webp',
+            'images/backstage/backstage-21.webp',
+            'images/backstage/backstage-22.webp'
+        ] 
+    },
+    fashion:    { 
+        title: 'FASHION',   
+        images: [
+            'images/fashion/fashion-21.webp',
+            'images/fashion/fashion-01.webp',
+            'images/fashion/fashion-02.webp',
+            'images/fashion/fashion-03.webp',
+            'images/fashion/fashion-04.webp',
+            'images/fashion/fashion-05.webp',
+            'images/fashion/fashion-06.webp',
+            'images/fashion/fashion-07.webp',
+            'images/fashion/fashion-08.webp',
+            'images/fashion/fashion-09.webp',
+            'images/fashion/fashion-10.webp',
+            'images/fashion/fashion-11.webp',
+            'images/fashion/fashion-12.webp',
+            'images/fashion/fashion-13.webp',
+            'images/fashion/fashion-14.webp',
+            'images/fashion/fashion-15.webp',
+            'images/fashion/fashion-16.webp',
+            'images/fashion/fashion-17.webp',
+            'images/fashion/fashion-18.webp',
+            'images/fashion/fashion-19.webp',
+            'images/fashion/fashion-20.webp'
+        ]    
+    },
+    commercial: {
+        title: 'COMMERCIAL',
+        images: [
+            'images/commercial/commercial-14.webp',
+            'images/commercial/commercial-01.webp',
+            'images/commercial/commercial-02.webp',
+            'images/commercial/commercial-03.webp',
+            'images/commercial/commercial-04.webp',
+            'images/commercial/commercial-05.webp',
+            'images/commercial/commercial-06.webp',
+            'images/commercial/commercial-07.webp',
+            'images/commercial/commercial-08.webp',
+            'images/commercial/commercial-09.webp',
+            'images/commercial/commercial-10.webp',
+            'images/commercial/commercial-11.webp',
+            'images/commercial/commercial-12.webp',
+            'images/commercial/commercial-13.webp',
+            'images/commercial/commercial-15.webp',
+            'images/commercial/commercial-16.webp',
+            'images/commercial/commercial-17.webp',
+            'images/commercial/commercial-18.webp',
+            'images/commercial/commercial-19.webp',
+            'images/commercial/commercial-20.webp',
+            'images/commercial/commercial-21.webp',
+            'images/commercial/commercial-22.webp',
+            'images/commercial/commercial-23.webp',
+            'images/commercial/commercial-24.webp',
+            'images/commercial/commercial-25.webp',
+            'images/commercial/commercial-26.webp',
+            'images/commercial/commercial-27.webp',
+            'images/commercial/commercial-28.webp',
+            'images/commercial/commercial-29.webp',
+            'images/commercial/commercial-30.webp',
+            'images/commercial/commercial-32.webp',
+            'images/commercial/commercial-33.webp',
+            'images/commercial/commercial-34.webp',
+            'images/commercial/commercial-35.webp',
+            'images/commercial/commercial-36.webp',
+            'images/commercial/commercial-37.webp',
+            'images/commercial/commercial-38.webp',
+            'images/commercial/commercial-39.webp',
+            'images/commercial/commercial-40.webp',
+            'images/commercial/commercial-41.webp',
+            'images/commercial/commercial-42.webp',
+            'images/commercial/commercial-43.webp',
+            'images/commercial/commercial-44.webp'
+
+
+        ] 
+    },
+    'fine-art': {
+        title: 'FINE ART', 
+        images: [
+            'images/fine-art/fine-art-13.webp',
+            'images/fine-art/fine-art-01.webp',
+            'images/fine-art/fine-art-02.webp',
+            'images/fine-art/fine-art-03.webp',
+            'images/fine-art/fine-art-04.webp',
+            'images/fine-art/fine-art-05.webp',
+            'images/fine-art/fine-art-06.webp',
+            'images/fine-art/fine-art-07.webp',
+            'images/fine-art/fine-art-08.webp',
+            'images/fine-art/fine-art-09.webp',
+            'images/fine-art/fine-art-10.webp',
+            'images/fine-art/fine-art-11.webp',
+            'images/fine-art/fine-art-12.webp'     
+        ]  
+    }
+};
+
+const ORDER = Object.keys(PROJECTS);
+
+/* Prima immagine di ogni categoria come anteprima hover.
+   Viene letta in automatico da PROJECTS — non serve aggiornarla. */
+const PREVIEW = {};
+ORDER.forEach(cat => { PREVIEW[cat] = PROJECTS[cat].images[0] || ''; });
+
+/* ══════════════════════════════════════════════════════════════════
+   SCROLL INFINITO
+   ══════════════════════════════════════════════════════════════════ */
+const track = document.getElementById('loop-track');
+const items = Array.from(track.children);
+const N     = items.length;
+
+/* Numera le voci */
+items.forEach((item, i) => {
+    const label = item.textContent.trim();
+    const num   = String(i + 1).padStart(2, '0');
+    item.innerHTML =
+        `<span class="item-num font-subtitle">${num}</span>` +
+        `<span>${label}</span>`;
+});
+
+/* Duplica finché il track è almeno 3× l'altezza della viewport */
+function fill() {
+    let h = track.getBoundingClientRect().height;
+    while (h < window.innerHeight * 3) {
+        items.forEach(it => track.appendChild(it.cloneNode(true)));
+        h = track.getBoundingClientRect().height;
+    }
+}
+fill();
+
+function loopH() {
+    return track.getBoundingClientRect().height / (track.children.length / N);
+}
+let LOOP_H = loopH();
+
+let vs = 0, ts = 0, scrollLock = false;
+
+window.addEventListener('wheel', e => {
+    if (scrollLock) return;
+    e.preventDefault();
+    ts += e.deltaY;
+}, { passive: false });
+
+let ty = 0;
+window.addEventListener('touchstart', e => { ty = e.touches[0].clientY; }, { passive: true });
+window.addEventListener('touchmove',  e => {
+    if (scrollLock) return;
+    ts += (ty - e.touches[0].clientY) * 1.5;
+    ty  = e.touches[0].clientY;
+}, { passive: true });
+
+(function loop() {
+    vs += (ts - vs) * 0.09;
+    gsap.set(track, { y: -gsap.utils.wrap(0, LOOP_H, vs) });
+    requestAnimationFrame(loop);
+})();
+
+window.addEventListener('resize', () => { LOOP_H = loopH(); });
+
+/* ══════════════════════════════════════════════════════════════════
+   HOVER PREVIEW — istantanea, nessuna transition
+   ══════════════════════════════════════════════════════════════════ */
+const preview    = document.getElementById('hover-preview');
+const previewImg = document.getElementById('hover-preview-img');
+
+track.addEventListener('mouseover', e => {
+    const item = e.target.closest('.portfolio-item');
+    if (!item) return;
+    const src = PREVIEW[item.dataset.cat];
+    if (src) { previewImg.src = src; preview.classList.add('visible'); }
+});
+
+track.addEventListener('mouseout', e => {
+    const item = e.target.closest('.portfolio-item');
+    if (!item) return;
+    if (e.relatedTarget?.closest?.('.portfolio-item')) return;
+    preview.classList.remove('visible');
+});
+
+/* ══════════════════════════════════════════════════════════════════
+   LIGHTBOX — apertura a schermo intero al click su un'immagine
+   ══════════════════════════════════════════════════════════════════ */
+const lb  = document.getElementById('lightbox');
+const lbi = document.getElementById('lightbox-img');
+
+function openLightbox(src) {
+    lbi.src = src;
+    lb.classList.add('is-open');
+}
+function closeLightbox() {
+    lb.classList.remove('is-open');
+}
+
+document.getElementById('detail-grid').addEventListener('click', e => {
+    const img = e.target.closest('img');
+    if (img) openLightbox(img.src);
+});
+
+lb.addEventListener('click', closeLightbox);
+lb.addEventListener('touchend', e => { e.preventDefault(); closeLightbox(); });
+
+/* ══════════════════════════════════════════════════════════════════
+   VISTA 2 — DETTAGLIO
+   ══════════════════════════════════════════════════════════════════ */
+const detailView = document.getElementById('detail-view');
+
+function openDetail(cat) {
+    const data = PROJECTS[cat];
+    if (!data) return;
+
+    const idx   = ORDER.indexOf(cat);
+    const prev  = ORDER[(idx - 1 + ORDER.length) % ORDER.length];
+    const next  = ORDER[(idx + 1) % ORDER.length];
+
+    document.getElementById('detail-title').textContent = data.title;
+    document.getElementById('detail-index').textContent =
+        `${String(idx + 1).padStart(2,'0')} / ${String(ORDER.length).padStart(2,'0')}`;
+
+    /* Griglia foto */
+    const grid = document.getElementById('detail-grid');
+    grid.innerHTML = '';
+    data.images.forEach(src => {
+        const img = document.createElement('img');
+        img.src = src; img.alt = data.title;
+        grid.appendChild(img);
+    });
+
+    /* Prev / Next */
+    const bp = document.getElementById('detail-prev');
+    const bn = document.getElementById('detail-next');
+    bp.textContent = `← ${PROJECTS[prev].title}`;
+    bn.textContent = `${PROJECTS[next].title} →`;
+    bp.onclick = e => { e.preventDefault(); openDetail(prev); };
+    bn.onclick = e => { e.preventDefault(); openDetail(next); };
+
+    detailView.scrollTop = 0;
+    detailView.classList.add('open');
+    scrollLock = true;
+    preview.classList.remove('visible');
+
+    history.pushState({ cat }, '', `projects.html?cat=${cat}`);
+    document.title = `Clarietta — ${data.title}`;
+}
+
+function closeDetail() {
+    detailView.classList.remove('open');
+    scrollLock = false;
+    history.pushState({}, '', 'projects.html');
+    document.title = 'Clarietta — Projects';
+}
+
+/* Click su voce della lista */
+track.addEventListener('click', e => {
+    const item = e.target.closest('.portfolio-item');
+    if (item) { e.preventDefault(); openDetail(item.dataset.cat); }
+});
+
+document.getElementById('detail-back').addEventListener('click', e => {
+    e.preventDefault(); closeDetail();
+});
+
+/* Tasto indietro del browser */
+window.addEventListener('popstate', e => {
+    e.state?.cat ? openDetail(e.state.cat) : closeDetail();
+});
+
+/* Caricamento diretto con ?cat=... nell'URL */
+(function () {
+    const cat = new URLSearchParams(window.location.search).get('cat');
+    if (cat && PROJECTS[cat]) openDetail(cat);
+})();
+
+/* ══════════════════════════════════════════════════════════════════
+   NAVBAR — link attivo
+   ══════════════════════════════════════════════════════════════════ */
+(function () {
+    const file = window.location.pathname.split('/').pop() || 'index.html';
+    document.querySelectorAll('[data-nav]').forEach(a => {
+        const active = a.dataset.nav === 'projects'
+            ? file === 'projects.html'
+            : a.getAttribute('href').split('?')[0] === file;
+        if (active) a.classList.add('nav-active');
+    });
+})();
+
+/* ══════════════════════════════════════════════════════════════════
+   HAMBURGER MOBILE
+   ══════════════════════════════════════════════════════════════════ */
+const hamburger  = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobile-menu');
+
+hamburger.addEventListener('click', () => {
+    const open = hamburger.classList.toggle('is-open');
+    mobileMenu.classList.toggle('hidden',  !open);
+    mobileMenu.classList.toggle('flex',     open);
+    mobileMenu.classList.toggle('is-open',  open);
+    document.body.style.overflow = open ? 'hidden' : '';
+});
+
+mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    hamburger.classList.remove('is-open');
+    mobileMenu.classList.remove('is-open', 'flex');
+    mobileMenu.classList.add('hidden');
+    document.body.style.overflow = '';
+}));
+
+/* ══════════════════════════════════════════════════════════════════
+   SCRAMBLE — link navbar desktop
+   ══════════════════════════════════════════════════════════════════ */
+(function () {
+    const ABC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+    document.querySelectorAll('header.hidden nav a').forEach(link => {
+        const orig = link.textContent.trim();
+        let tw = null;
+
+        const spans = txt => {
+            link.innerHTML = '';
+            return [...txt].map(ch => {
+                const s = document.createElement('span');
+                s.className = 'scramble-char';
+                s.textContent = ch;
+                link.appendChild(s);
+                return s;
+            });
+        };
+
+        spans(orig);
+
+        link.addEventListener('mouseenter', () => {
+            if (tw) tw.kill();
+            spans(orig).forEach((s, i) => {
+                if (orig[i] === ' ') return;
+                tw = gsap.to(s, {
+                    duration: 0.03,
+                    repeat:   6 + Math.floor(Math.random() * 4),
+                    delay:    i * 0.025,
+                    onRepeat:   () => { s.textContent = ABC[Math.floor(Math.random() * ABC.length)]; },
+                    onComplete: () => { s.textContent = orig[i]; }
+                });
+            });
+        });
+    });
+})();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Clarietta — About</title>
+	<style>@import url("https://use.typekit.net/bkd5uaz.css");</style>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+	<script src="https://assets.incode.it/gsap-business/minified/SplitText.min.js"></script>
+	<script>gsap.registerPlugin(SplitText, ScrollTrigger);</script>
+	<style>
+		html { scroll-behavior: smooth; }
+		body { font-family: "aktiv-grotesk", sans-serif; }
+
+		.font-title    { font-family: "aktiv-grotesk", sans-serif; font-weight: 400; font-size: 5vw; line-height: 1; letter-spacing: -0.02em; }
+		.font-subtitle { font-family: "aktiv-grotesk", sans-serif; font-weight: 400; font-size: 1vw;   line-height: 1; letter-spacing: -0.01em; }
+		@media (max-width: 1024px) {
+			.font-subtitle { font-size: 2vw !important; }
+			.font-title   { font-size: 10vw !important;  }
+		}
+
+		.nav-active { color: #fff !important;}
+		.scramble-char { display: inline-block; }
+
+		/* hamburger */
+		#hamburger span { transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s ease; }
+		#hamburger.is-open span:nth-child(1) { transform: translateY(6px) rotate(45deg); background: #fff; }
+		#hamburger.is-open span:nth-child(2) { opacity: 0; }
+		#hamburger.is-open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); background: #fff; }
+		#mobile-menu { transition: opacity 0.35s ease; }
+		#mobile-menu.is-open { opacity: 1; pointer-events: auto; }
+
+		/* evidenzia testo con mouse :) */
+		::selection {
+			background: #CCFF00;
+			color: #000;
+		}
+		::-moz-selection {
+			background: #CCFF00;
+			color: #000;
+		}
+	</style>
+</head>
+<body class="antialiased text-white bg-black p-5 min-h-screen">
+
+	<!-- ── Header desktop ── -->
+	<header class="font-subtitle hidden md:grid grid-cols-3 fixed top-0 left-0 w-full h-[60px] items-center z-[9999]">
+		<nav class="pl-8">
+			<div class="flex items-center gap-10 text-white/50">
+				<a href="projects.html" data-nav="projects" class="font-subtitle hover:text-white transition-colors duration-200">PROJECTS</a>
+				<a href="gallery.html" data-nav="gallery"  class="font-subtitle hover:text-white transition-colors duration-200">GALLERY</a>
+			</div>
+		</nav>
+		<h1 class="text-center">
+			<a href="index.html" data-nav="home" class="font-subtitle inline-block">CLARIETTA</a>
+		</h1>
+		<nav class="pr-8 flex justify-end">
+			<div class="flex items-center gap-10 text-white/50">
+				<a href="about.html" data-nav="about" class="font-subtitle hover:text-white transition-colors duration-200">ABOUT</a>
+				<a href="contact.html" data-nav="contact" class="font-subtitle hover:text-white transition-colors duration-200">CONTACT</a>
+			</div>
+		</nav>
+	</header>
+
+	<!-- ── Header mobile ── -->
+	<header class="md:hidden fixed top-0 left-0 w-full h-[52px] flex items-center px-5 z-[10002]">
+		<a href="index.html" data-nav="home" class="!font-subtitle absolute left-1/2 -translate-x-1/2">CLARIETTA</a>
+		<button id="hamburger" aria-label="Menu"
+		class="ml-auto flex flex-col gap-[5px] cursor-pointer p-2 z-[10001] bg-transparent border-0">
+		<span class="block w-[22px] h-px bg-white/60"></span>
+		<span class="block w-[22px] h-px bg-white/60"></span>
+		<span class="block w-[22px] h-px bg-white/60"></span>
+	</button>
+</header>
+
+<div id="mobile-menu" role="dialog" aria-modal="true"
+class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-start gap-3 opacity-0 pointer-events-none">
+<a href="index.html"    data-nav="home"     class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">HOME</a>
+<a href="projects.html" data-nav="projects" class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">PROJECTS</a>
+<a href="gallery.html"  data-nav="gallery"  class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">GALLERY</a>
+<a href="about.html"    data-nav="about"    class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">ABOUT</a>
+<a href="contact.html"  data-nav="contact"  class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">CONTACT</a>
+</div>
+
+<div class="fixed inset-x-0 top-[52px] bottom-0 md:top-0 z-[-10] flex w-full justify-end pointer-events-none opacity-70">
+	<img src="images/myself.webp" alt="Myself" class="h-full w-full max-w-none object-cover md:h-auto md:max-w-md">
+</div>
+
+<main class="relative z-10 font-title flex min-h-screen items-start justify-start px-2 pt-24 md:pt-[5vh] pb-10 select-text">
+	<div class="w-full md:w-[60vw]">
+		<p class="reveal-text">
+			CLARIETTA :) <br>
+			GRAPHIC DESIGNER.<br>
+			PHOTOGRAPHER.<br>
+			PROFESSIONAL COLLECTOR OF "WAIT, THIS COULD BE A NICE SHOT" MOMENTS.<br>
+			THIS IS A SELECTION OF THE PHOTOGRAPHS SHE LIKES ENOUGH TO SHOW OTHER HUMANS.<br>
+			THE REST WILL PROBABLY STAY HIDDEN FOREVER.<br>
+			SHE ALSO TALKS ABOUT HERSELF IN THIRD PERSON. <br>
+			AT THIS POINT, IT'S TOO LATE TO STOP.
+		</p>
+	</div>
+</main>
+
+<footer class="relative z-10 font-subtitle uppercase text-right text-[0.7rem] sm:text-xs mt-2 text-white/70">
+	© 2026 Clarietta - All Rights Reserved
+</footer>
+
+<script>
+
+	gsap.registerPlugin(ScrollTrigger);
+	document.querySelectorAll(".reveal-text").forEach((p) => {
+		// Divide il contenuto mantenendo i <br>
+		const parts = p.innerHTML.split(/(<br\s*\/?>)/i);
+		p.innerHTML = parts.map(part => {
+			// Mantiene i ritorni a capo
+			if (/<br/i.test(part)) return part;
+			// Divide il testo in parole
+			return part.split(" ").map(word => {
+				// Ogni parola è un blocco che non può spezzarsi
+				const letters = word.split("").map(letter =>
+				`<span class="letter">${letter}</span>`
+				).join("");
+				return `<span class="word">${letters}</span> `;
+			}).join("");
+		}).join("");
+		const letters = p.querySelectorAll(".letter");
+		gsap.fromTo(
+		letters,
+		{
+			opacity: 0,
+			y: 8
+		},
+		{
+			opacity: 1,
+			y: 0,
+			duration: 1,
+			stagger: 0.02,
+			ease: "power2.out",
+			scrollTrigger: {
+				trigger: p,
+				start: "top 50%",
+				once: true
+			}
+		}
+		);
+	});
+
+	/* ══ Navbar — stato attivo ══ */
+	(function setNavActive() {
+		const currentFile = window.location.pathname.split('/').pop() || 'index.html';
+		document.querySelectorAll('[data-nav]').forEach(link => {
+			const navKey = link.dataset.nav;
+			const isActive = navKey === 'home'
+			? (currentFile === 'index.html' || currentFile === '')
+			: link.getAttribute('href').split('?')[0] === currentFile;
+			if (isActive) link.classList.add('nav-active');
+		});
+	})();
+
+	/* ══ Hamburger menu mobile ══ */
+	const hamburger  = document.getElementById('hamburger');
+	const mobileMenu = document.getElementById('mobile-menu');
+
+	hamburger.addEventListener('click', () => {
+		const open = hamburger.classList.toggle('is-open');
+		if (open) {
+			mobileMenu.classList.remove('hidden');
+			mobileMenu.classList.add('flex');
+		} else {
+			mobileMenu.classList.add('hidden');
+			mobileMenu.classList.remove('flex');
+		}
+		mobileMenu.classList.toggle('is-open', open);
+		document.body.style.overflow = open ? 'hidden' : '';
+	});
+
+	hamburger.addEventListener('keydown', (e) => {
+		if (e.key === 'Enter' || e.key === ' ') hamburger.click();
+	});
+
+	mobileMenu.querySelectorAll('a').forEach(a => {
+		a.addEventListener('click', () => {
+			hamburger.classList.remove('is-open');
+			mobileMenu.classList.remove('is-open', 'flex');
+			mobileMenu.classList.add('hidden');
+			document.body.style.overflow = '';
+		});
+	});
+
+	/* ══ Scramble GSAP sui link desktop ══ */
+	(() => {
+		const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+		document.querySelectorAll('header:not(#mobile-menu) nav a').forEach(link => {
+			const original = link.textContent.trim();
+			let tween = null;
+			const buildSpans = (text) => {
+				link.innerHTML = '';
+				return text.split('').map(ch => {
+					const span = document.createElement('span');
+					span.className = 'scramble-char';
+					span.textContent = ch;
+					link.appendChild(span);
+					return span;
+				});
+			};
+			buildSpans(original);
+			link.addEventListener('mouseenter', () => {
+				if (tween) tween.kill();
+				const spans = buildSpans(original);
+				spans.forEach((span, i) => {
+					if (original[i] === ' ') return;
+					const maxIter = 6 + Math.floor(Math.random() * 4);
+					tween = gsap.to(span, {
+						duration: 0.03, repeat: maxIter, delay: i * 0.025,
+						onRepeat:   () => { span.textContent = CHARS[Math.floor(Math.random() * CHARS.length)]; },
+						onComplete: () => { span.textContent = original[i]; }
+					});
+				});
+			});
+		});
+	})();
+</script>
+</body>
+</html>
