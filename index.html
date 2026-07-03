@@ -9,25 +9,25 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <style>
         html, body { margin: 0; background: black; color: white; scroll-behavior: smooth; }
-        
+
         .font-title    { font-family: "aktiv-grotesk", sans-serif; font-weight: 400; font-size: 5vw; line-height: 1; letter-spacing: -0.02em; }
         .font-title2   { font-family: "aktiv-grotesk", sans-serif; font-weight: 400; font-size: 1.5vw; line-height: 1; letter-spacing: -0.01em; }
         .font-subtitle { font-family: "aktiv-grotesk", sans-serif; font-weight: 400; font-size: 1vw; line-height: 1; letter-spacing: -0.01em; }
         @media (max-width: 1024px) {
             .font-subtitle { font-size: 2vw !important; }
-            .font-title2   { font-size: 4vw !important; }
+            .font-title2   { font-size: 5vw !important; }
             .font-title    { font-size: 17vw !important; }
         }
-        
+
         .scramble-char { display: inline-block; }
         .nav-active { color: #fff !important; }
-        
+
         #hamburger span { transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s ease; }
         #hamburger.is-open span:nth-child(1) { transform: translateY(6px) rotate(45deg); background: #fff; }
         #hamburger.is-open span:nth-child(2) { opacity: 0; }
         #hamburger.is-open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); background: #fff; }
-        
-        
+
+
         /* ══ Loader ══ */
         #loader {
             position: fixed;
@@ -45,7 +45,7 @@
         }
         #mobile-menu { transition: opacity 0.35s ease; }
         #mobile-menu.is-open { opacity: 1; pointer-events: auto; }
-        
+
         /* evidenzia testo con mouse :) */
         ::selection {
             background: #CCFF00;
@@ -59,12 +59,12 @@
 </head>
 
 <body class="antialiased">
-    
+
     <!-- ── Loader ── -->
     <div id="loader">
         <div id="loader-counter" class="font-subtitle">0</div>
     </div>
-    
+
     <!-- ── Header desktop ── -->
     <header class="font-subtitle hidden md:grid grid-cols-3 fixed top-0 left-0 w-full h-[60px] items-center z-[9999]">
         <nav class="pl-8">
@@ -83,8 +83,8 @@
             </div>
         </nav>
     </header>
-    
-    
+
+
     <!-- ── Header mobile ── -->
     <header class="md:hidden fixed top-0 left-0 w-full h-[52px] flex items-center px-5 z-[10002]">
         <a href="index.html" data-nav="home" class="!font-subtitle absolute left-1/2 -translate-x-1/2">CLARIETTA</a>
@@ -108,11 +108,13 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
 <!-- ── Hero ── -->
 <section id="hero" class="relative z-[5] h-screen flex justify-center items-end pb-0.5 px-3">
     <div class="flex flex-col w-full max-w-[100vw]">
-        
+
         <div id="hero-title-wrap" class="max-sm:absolute max-sm:top-1/2 max-sm:left-1/2 max-sm:-translate-x-1/2 max-sm:-translate-y-1/2 max-sm:w-full max-sm:text-center">
             <div id="hero-title" class="font-title text-[15vw] relative leading-[0.9] z-[100] max-sm:text-center" style="opacity:0"></div>
         </div>
-        
+
+        <div class="font-title2 uppercase text-right justify-center">unfortunately, she has a camera</div>
+
         <div class="flex justify-start items-center w-full gap-5 pb-3 mt-8 md:mt-0">
             <!-- Instagram -->
             <a href="https://www.instagram.com/clariettaa?igsh=dDBoMndqNGRxNGgz" target="_blank" rel="noopener noreferrer" class="hover:opacity-70 transition-opacity z-[100]">
@@ -122,7 +124,7 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
                     <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
                 </svg>
             </a>
-            
+
             <!-- LinkedIn -->
             <a href="https://www.linkedin.com/in/clara-corti-502a0b3a8?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" rel="noopener noreferrer" class="hover:opacity-70 transition-opacity z-[100]">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 md:w-7 md:h-7">
@@ -133,7 +135,7 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
                     <line x1="11" y1="10" x2="11" y2="17"></line>
                 </svg>
             </a>
-            
+
             <!-- Gmail -->
             <a href="mailto:clarietta.gd@gmail.com" class="hover:opacity-70 transition-opacity z-[100]">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 md:w-7 md:h-7">
@@ -141,10 +143,8 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
                     <path d="M2 6.5l10 7 10-7"></path>
                 </svg>
             </a>
-            
+
             <div class="flex-1 min-w-0 relative z-[100] flex flex-col items-end gap-1">
-                <div class="font-title2 uppercase text-right">unfortunately, she has a camera</div>
-                
                 <footer class="font-subtitle uppercase text-right text-[0.7rem] sm:text-xs z-[100] text-white/70">
                     © 2026 Clarietta - All Rights Reserved
                 </footer>
@@ -154,12 +154,12 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
 </section>
 
 <script>
-    
+
     (() => {
         const loader  = document.getElementById('loader');
         const counter = document.getElementById('loader-counter');
         const titleEl = document.getElementById('hero-title');
-        
+
         // Due righe: "THIS IS" e "CLARIETTA", ognuna con le lettere splittate
         const lines = ['THIS IS', 'CLARIETTA'];
         titleEl.innerHTML = lines.map(line =>
@@ -171,22 +171,22 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
             ).join('') +
             '</div>'
             ).join('');
-            
+
             const letters = titleEl.querySelectorAll('.tl');
-            
+
             // Durata totale: 2000–3000ms random
             const duration = 2000 + Math.random() * 1000;
             const start    = performance.now();
-            
+
             // Counter da 0 a 100
             const tick = (now) => {
                 const elapsed  = now - start;
                 const progress = Math.min(elapsed / duration, 1);
-                
+
                 // Curva ease-out per il counter
                 const eased = 1 - Math.pow(1 - progress, 2);
                 counter.textContent = Math.floor(eased * 100);
-                
+
                 if (progress < 1) {
                     requestAnimationFrame(tick);
                 } else {
@@ -194,7 +194,7 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
                     // Fade out loader
                     loader.classList.add('is-done');
                     loader.addEventListener('transitionend', () => loader.remove(), { once: true });
-                    
+
                     // Mostra il titolo e anima lettera per lettera con GSAP
                     titleEl.style.opacity = '1';
                     gsap.fromTo(letters,
@@ -212,12 +212,12 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
             };
             requestAnimationFrame(tick);
         })();
-        
+
         /* ══ Spawning immagini sull'hero ══ */
         (() => {
             const hero = document.getElementById('hero');
             if (!hero) return;
-            
+
             const imgs = [
             'images/fine-art/fine-art-13.webp',
             'images/fine-art/fine-art-01.webp',
@@ -238,16 +238,16 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
             'images/fine-art/fine-art-12.webp'
             ];
             imgs.forEach(src => (new Image()).src = src);
-            
+
             const wrap = document.createElement('div');
             wrap.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:1;contain:layout style paint';
             document.body.appendChild(wrap);
-            
+
             const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-            
+
             // Larghezza fissa in vw, altezza automatica per rispettare le proporzioni originali dell'immagine
             const imgWidthVw = isTouch ? '55vw' : '25vw';
-            
+
             // Timing: su touch (mobile/tablet) comparsa più rapida e fluida, ma resta visibile 2s pieni
             const THROTTLE_MS   = isTouch ? 90   : 170;   // intervallo minimo tra due spawn
             const FADE_IN_MS    = isTouch ? 180  : 300;   // durata comparsa
@@ -255,24 +255,24 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
             const FADE_OUT_MS   = isTouch ? 260  : 500;   // durata scomparsa
             const EASE_IN       = 'cubic-bezier(.16,1,.3,1)';   // easing più scattante e fluido in entrata
             const EASE_OUT      = 'cubic-bezier(.7,0,.84,0)';   // easing rapido in uscita
-            
+
             const pool = Array.from({ length: 5 }, () => {
                 const el = document.createElement('img');
                 el.style.cssText = `position:absolute;width:${imgWidthVw};height:auto;pointer-events:none;opacity:0;will-change:transform,opacity;transform:translate(-50%,-50%)`;
                 wrap.appendChild(el);
                 return { el, t: null };
             });
-            
+
             let pi = 0, ii = 0, last = 0;
-            
+
             const spawn = (x, y) => {
                 const now = performance.now();
                 if (now - last < THROTTLE_MS) return;
                 last = now;
-                
+
                 const item = pool[pi]; pi = (pi + 1) % pool.length;
                 clearTimeout(item.t);
-                
+
                 const el = item.el;
                 el.src = imgs[ii]; ii = (ii + 1) % imgs.length;
                 Object.assign(el.style, {
@@ -280,19 +280,19 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
                     opacity: '0', transform: 'translate(-50%,-50%)', transition: 'none'
                 });
                 void el.offsetWidth;
-                
+
                 requestAnimationFrame(() => {
                     el.style.transition = `opacity ${FADE_IN_MS}ms ${EASE_IN}, transform ${FADE_IN_MS}ms ${EASE_IN}`;
                     el.style.opacity = '1';
                 });
-                
+
                 item.t = setTimeout(() => {
                     el.style.transition = `opacity ${FADE_OUT_MS}ms ${EASE_OUT}, transform ${FADE_OUT_MS}ms ${EASE_OUT}`;
                     el.style.opacity = '0';
                     el.style.transform = 'translate(-50%,-50%) scale(.92)';
                 }, HOLD_MS);
             };
-            
+
             if (isTouch) {
                 /* ── Touch/mobile: spawn automatico in posizioni casuali ── */
                 // Su mobile le immagini sono più grandi per essere visibili, altezza sempre automatica
@@ -300,7 +300,7 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
                     el.style.width  = '55vw';
                     el.style.height = 'auto';
                 });
-                
+
                 const spawnRandom = () => {
                     // Margine per non uscire troppo dai bordi
                     const margin = 80;
@@ -310,10 +310,10 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
                     // Intervallo variabile più ravvicinato per un effetto più fluido e vivace
                     setTimeout(spawnRandom, 450 + Math.random() * 450);
                 };
-                
+
                 // Prima spawn quasi immediata
                 setTimeout(spawnRandom, 100);
-                
+
             } else {
                 /* ── Desktop: spawn al movimento del mouse ── */
                 hero.addEventListener('mousemove',  e => spawn(e.clientX, e.clientY), { passive: true });
@@ -323,7 +323,7 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
                 }));
             }
         })();
-        
+
         /* ══ Navbar — stato attivo ══ */
         (function setNavActive() {
             const currentFile = window.location.pathname.split('/').pop() || 'index.html';
@@ -335,11 +335,11 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
                 if (isActive) link.classList.add('nav-active');
             });
         })();
-        
+
         /* ══ Hamburger menu mobile ══ */
         const hamburger  = document.getElementById('hamburger');
         const mobileMenu = document.getElementById('mobile-menu');
-        
+
         hamburger.addEventListener('click', () => {
             const open = hamburger.classList.toggle('is-open');
             if (open) {
@@ -352,11 +352,11 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
             mobileMenu.classList.toggle('is-open', open);
             document.body.style.overflow = open ? 'hidden' : '';
         });
-        
+
         hamburger.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') hamburger.click();
         });
-        
+
         mobileMenu.querySelectorAll('a').forEach(a => {
             a.addEventListener('click', () => {
                 hamburger.classList.remove('is-open');
@@ -365,15 +365,15 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
                 document.body.style.overflow = '';
             });
         });
-        
+
         /* ══ Scramble GSAP sui link desktop ══ */
         (() => {
             const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            
+
             document.querySelectorAll('header:not(#mobile-menu) nav a').forEach(link => {
                 const original = link.textContent.trim();
                 let tween = null;
-                
+
                 const buildSpans = (text) => {
                     link.innerHTML = '';
                     return text.split('').map(ch => {
@@ -384,9 +384,9 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
                         return span;
                     });
                 };
-                
+
                 buildSpans(original);
-                
+
                 link.addEventListener('mouseenter', () => {
                     if (tween) tween.kill();
                     const spans = buildSpans(original);
@@ -404,7 +404,7 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
                 });
             });
         })();
-        
+
         /* ══ Click su CLARIETTA in home: scrolla all'hero invece di ricaricare ══ */
         (() => {
             const brandLink = document.querySelector('h1 a[data-nav="home"]');
@@ -418,6 +418,6 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
             });
         })();
     </script>
-    
+
 </body>
 </html>
