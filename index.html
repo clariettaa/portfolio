@@ -2,13 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Clarietta</title>
     <style>@import url("https://use.typekit.net/bkd5uaz.css");</style>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <style>
-        html, body { margin: 0; background: black; color: white; scroll-behavior: smooth; }
+        html, body {
+            margin: 0;
+            background: black;
+            color: white;
+            scroll-behavior: smooth;
+            height: 100%;
+            overflow: hidden; /* la home è una sezione fissa, niente scroll */
+            overscroll-behavior: none;
+        }
 
         .font-title    { font-family: "aktiv-grotesk", sans-serif; font-weight: 400; font-size: 5vw; line-height: 1; letter-spacing: -0.02em; }
         .font-title2   { font-family: "aktiv-grotesk", sans-serif; font-weight: 400; font-size: 1.5vw; line-height: 1; letter-spacing: -0.01em; }
@@ -45,6 +53,12 @@
         }
         #mobile-menu { transition: opacity 0.35s ease; }
         #mobile-menu.is-open { opacity: 1; pointer-events: auto; }
+
+        /* ══ Hero: altezza reale della viewport, non 100vh statico ══ */
+        #hero {
+            height: 100vh;   /* fallback per browser che non supportano dvh */
+            height: 100dvh;
+        }
 
         /* evidenzia testo con mouse :) */
         ::selection {
@@ -106,7 +120,7 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
 </div>
 
 <!-- ── Hero ── -->
-<section id="hero" class="relative z-[5] h-screen flex justify-center items-end pb-0.5 px-3">
+<section id="hero" class="relative z-[5] flex justify-center items-end pb-0.5 px-3">
     <div class="flex flex-col w-full max-w-[100vw]">
 
         <div id="hero-title-wrap" class="max-sm:absolute max-sm:top-1/2 max-sm:left-1/2 max-sm:-translate-x-1/2 max-sm:-translate-y-1/2 max-sm:w-full max-sm:text-center">
