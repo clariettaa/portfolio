@@ -8,23 +8,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <style>
-        html {
-            height: 100%;
-            overflow: hidden;
-            overscroll-behavior: none;
-        }
-        body {
+        html, body {
             margin: 0;
             background: black;
             color: white;
             scroll-behavior: smooth;
             height: 100%;
-            width: 100%;
-            position: fixed;   /* elimina il rubber-band/overscroll su iOS e Android */
-            inset: 0;
-            overflow: hidden;
+            overflow: hidden; /* la home è una sezione fissa, niente scroll */
             overscroll-behavior: none;
-            touch-action: none; /* la home è statica, niente pan/scroll del documento */
         }
 
         .font-title    { font-family: "aktiv-grotesk", sans-serif; font-weight: 400; font-size: 5vw; line-height: 1; letter-spacing: -0.02em; }
