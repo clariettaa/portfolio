@@ -24,6 +24,9 @@
 
   #canvas-wrap{position:fixed;inset:0;overflow:hidden;cursor:grab;}
   #canvas-wrap, #canvas, .g-tile{-webkit-user-select:none;user-select:none;-webkit-user-drag:none;}
+  /* touch-action: pan-x pan-y permette il pinch-zoom nativo del browser,
+     mentre il pan a un dito resta gestito dal nostro JS */
+  #canvas-wrap{touch-action: pan-x pan-y;}
   /* translate3d forza il layer GPU: fondamentale per fluidità durante drag/scroll */
   #canvas{position:absolute;top:0;left:0;will-change:transform;transform:translate3d(0,0,0);}
   .g-tile{
@@ -37,7 +40,7 @@
 
   #lightbox{position:fixed;inset:0;z-index:8000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0);opacity:0;pointer-events:none;transition:background .4s,opacity .4s;}
   #lightbox.is-open{background:rgba(0,0,0,.95);opacity:1;pointer-events:auto;}
-  #lightbox img{max-width:90vw;max-height:90vh;object-fit:contain;transform:scale(.92);transition:transform .4s cubic-bezier(.22,1,.36,1);}
+  #lightbox img{max-width:90vw;max-height:90vh;object-fit:contain;transform:scale(.92);transition:transform .4s cubic-bezier(.22,1,.36,1);touch-action:pinch-zoom;}
   #lightbox.is-open img{transform:scale(1);}
 
   /* hamburger */
@@ -563,6 +566,7 @@ function up(){
 }
 
 let lastTouchTime=0;
+let isPinching=false; /* true mentre l'utente sta usando due (o più) dita per pizzicare lo zoom nativo */
 
 document.addEventListener('mousedown', e=>{
   if(Date.now()-lastTouchTime<800)return; /* ignora il "ghost click" dopo un touch */
@@ -573,9 +577,46 @@ document.addEventListener('selectstart', e=>{if(drag)e.preventDefault();});
 document.addEventListener('mousemove', e=>{if(Date.now()-lastTouchTime<800)return;mv(e.clientX,e.clientY);});
 document.addEventListener('mouseup',   e=>{if(Date.now()-lastTouchTime<800)return;up();});
 document.addEventListener('mouseleave',up);
-wrap.addEventListener('touchstart',e=>{lastTouchTime=Date.now();const t=e.touches[0];dn(t.clientX,t.clientY,t.target);},{passive:true});
-wrap.addEventListener('touchmove', e=>{lastTouchTime=Date.now();e.preventDefault();mv(e.touches[0].clientX,e.touches[0].clientY);},{passive:false});
-wrap.addEventListener('touchend',  e=>{lastTouchTime=Date.now();e.preventDefault();up();},{passive:false});
+
+wrap.addEventListener('touchstart', e=>{
+  lastTouchTime=Date.now();
+  if(e.touches.length>1){
+    /* Due o più dita: l'utente sta per pizzicare per zoomare.
+       Interrompiamo qualsiasi drag in corso e lasciamo che sia
+       il browser a gestire nativamente il pinch-zoom. */
+    isPinching = true;
+    if (drag) up();
+    return;
+  }
+  isPinching = false;
+  const t=e.touches[0];
+  dn(t.clientX,t.clientY,t.target);
+},{passive:true});
+
+wrap.addEventListener('touchmove', e=>{
+  lastTouchTime=Date.now();
+  if(e.touches.length>1 || isPinching){
+    /* Pinch in corso: NON blocchiamo l'evento (niente preventDefault),
+       così il browser può zoomare liberamente. Il nostro pan/drag
+       custom resta fermo finché l'utente non torna a un dito solo. */
+    return;
+  }
+  e.preventDefault();
+  mv(e.touches[0].clientX,e.touches[0].clientY);
+},{passive:false});
+
+wrap.addEventListener('touchend', e=>{
+  lastTouchTime=Date.now();
+  if(e.touches.length>0){
+    /* Restano ancora dita sullo schermo (fine pinch ma non fine gesto):
+       non facciamo scattare click/lightbox, aspettiamo che tutte le
+       dita vengano sollevate. */
+    return;
+  }
+  isPinching = false;
+  e.preventDefault();
+  up();
+},{passive:false});
 
 /* ══ Scroll: si somma al drag, funziona in tutte le direzioni,
    e l'infinito è già garantito dal wrap modulare di sync() ══ */
@@ -590,7 +631,32 @@ wrap.addEventListener('wheel', e => {
 const lb=document.getElementById('lightbox'),lbi=document.getElementById('lightbox-img');
 function tgl(src){lb.classList.contains('is-open')?lb.classList.remove('is-open'):(lbi.src=src,lb.classList.add('is-open'));}
 lb.addEventListener('click',()=>lb.classList.remove('is-open'));
-lb.addEventListener('touchend',e=>{e.preventDefault();lb.classList.remove('is-open');});
+lb.addEventListener('touchend',e=>{
+  if(e.touches.length>0) return; /* niente chiusura se l'utente sta ancora pizzicando con più dita */
+  e.preventDefault();
+  lb.classList.remove('is-open');
+});
+
+/* ══ Reset dello stato quando la pagina torna visibile da bfcache
+   (es. dopo aver premuto "indietro" nel browser): senza questo,
+   il lightbox e lo stato di drag potrebbero restare "congelati"
+   aperti/attivi così come erano prima di lasciare la pagina. ══ */
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) {
+    lb.classList.remove('is-open');
+    isPinching = false;
+    if (drag) up();
+    document.body.classList.remove('is-dragging');
+  }
+});
+
+/* Se la scheda torna visibile (es. cambio app su mobile e poi ritorno)
+   assicuriamoci che il lightbox non resti bloccato in uno stato strano */
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    isPinching = false;
+  }
+});
 
 let rt;
 window.addEventListener('resize',()=>{

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<title>Clarietta — Contact</title>
 	<style>@import url("https://use.typekit.net/bkd5uaz.css");</style>
 	<script src="https://cdn.tailwindcss.com"></script>
@@ -12,8 +12,22 @@
 	<script>gsap.registerPlugin(SplitText, ScrollTrigger);</script>
 
 	<style>
-		html { scroll-behavior: smooth; }
-		body { font-family: "aktiv-grotesk", sans-serif; }
+		html {
+			height: 100%;
+			overflow: hidden;
+			overscroll-behavior: none;
+		}
+		body {
+			margin: 0;
+			font-family: "aktiv-grotesk", sans-serif;
+			height: 100%;
+			width: 100%;
+			position: fixed;   /* elimina il rubber-band/overscroll su iOS e Android */
+			inset: 0;
+			overflow: hidden;
+			overscroll-behavior: none;
+			touch-action: none; /* la pagina è statica, niente pan/scroll del documento */
+		}
 
         .font-title    { font-family: "aktiv-grotesk", sans-serif; font-weight: 400; font-size: 5vw; line-height: 1; letter-spacing: -0.02em; }
         .font-subtitle { font-family: "aktiv-grotesk", sans-serif; font-weight: 400; font-size: 1vw;   line-height: 1; letter-spacing: -0.01em; }
@@ -47,7 +61,7 @@
 
 	</style>
 </head>
-<body class="antialiased text-white bg-black min-h-screen flex flex-col">
+<body class="antialiased text-white bg-black h-full flex flex-col">
 
 	<!-- ── Header desktop ── -->
     <header class="font-subtitle hidden md:grid grid-cols-3 fixed top-0 left-0 w-full h-[60px] items-center z-[9999]">
