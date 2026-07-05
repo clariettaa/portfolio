@@ -15,8 +15,15 @@
         .font-title    { font-family: "aktiv-grotesk", sans-serif; font-weight: 400; font-size: 5vw; line-height: 1; letter-spacing: -0.02em; }
         .font-subtitle { font-family: "aktiv-grotesk", sans-serif; font-weight: 400; font-size: 1vw;   line-height: 1; letter-spacing: -0.01em; }
         @media (max-width: 1024px) {
-            .font-subtitle { font-size: 2vw !important; }
-            .font-title   { font-size: 10vw !important;  }
+            .font-subtitle { font-size: 2vmin !important; }
+            .font-title   { font-size: 10vmin !important;  }
+        }
+
+        /* ── Su dispositivi touch (telefoni/tablet), la navbar resta sempre
+           quella mobile con hamburger, indipendentemente dall'orientamento ── */
+        @media (hover: none) and (pointer: coarse) {
+            header.md\:grid { display: none !important; }
+            header.md\:hidden { display: flex !important; }
         }
 
         .scramble-char { display: inline-block; }
@@ -57,6 +64,10 @@
         .portfolio-item .item-num { opacity: 0.4; transition: none; }
         .portfolio-item:hover .item-num { opacity: 1; }
 
+        /* ── Voce centrata sullo schermo su mobile (equivalente dell'hover) ── */
+        .portfolio-item.is-center { opacity: 1; }
+        .portfolio-item.is-center .item-num { opacity: 1; }
+
         /* ── Preview fissa a destra ── */
         #hover-preview {
             position: fixed;
@@ -72,6 +83,17 @@
         }
         #hover-preview.visible { opacity: 1; }
         #hover-preview img { width: 100%; height: auto; display: block; }
+
+        /* Su mobile/tablet: preview centrata dietro al testo attivo, non spinta a destra */
+        @media (max-width: 1024px) {
+            #hover-preview {
+                right: auto;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                width: 70vw;
+            }
+        }
 
         /* ── Vista 2: dettaglio categoria ── */
         #detail-view {
@@ -125,26 +147,6 @@
 
 <div id="lightbox"><img id="lightbox-img" src="" alt=""></div>
 
-
-
-	<!-- ── Header desktop ── -->
-    <header class="font-subtitle hidden md:grid grid-cols-3 fixed top-0 left-0 w-full h-[60px] items-center z-[9999]">
-        <nav class="pl-8">
-            <div class="flex items-center gap-10 text-white/50">
-                <a href="projects.html" data-nav="projects" class="font-subtitle hover:text-white transition-colors duration-200">PROJECTS</a>
-                <a href="gallery.html" data-nav="gallery"  class="font-subtitle hover:text-white transition-colors duration-200">GALLERY</a>
-            </div>
-        </nav>
-        <h1 class="text-center">
-            <a href="index.html" data-nav="home" class="font-subtitle inline-block">CLARIETTA</a>
-        </h1>
-        <nav class="pr-8 flex justify-end">
-            <div class="flex items-center gap-10 text-white/50">
-                <a href="about.html" data-nav="about" class="font-subtitle hover:text-white transition-colors duration-200">ABOUT</a>
-                <a href="contact.html" data-nav="contact" class="font-subtitle hover:text-white transition-colors duration-200">CONTACT</a>
-            </div>
-        </nav>
-    </header>
 
 
 	<!-- ── Header desktop ── -->
@@ -282,7 +284,7 @@ const PROJECTS = {
     portraits: {
         title: 'PORTRAITS',
         images: [
-            'images/portraits/portraits-02.webp','images/portraits/portraits-01.webp',
+            'images/portraits/portraits-01.webp','images/portraits/portraits-02.webp',
             'images/portraits/portraits-03.webp','images/portraits/portraits-04.webp',
             'images/portraits/portraits-05.webp','images/portraits/portraits-06.webp',
             'images/portraits/portraits-07.webp','images/portraits/portraits-08.webp',
@@ -371,6 +373,11 @@ const PROJECTS = {
 
 const ORDER = Object.keys(PROJECTS);
 
+/* Solo touch (mobile/tablet): niente hover disponibile, quindi l'evidenziazione
+   e la preview vanno agganciate alla voce più vicina al centro dello schermo
+   durante lo scroll, non al passaggio del mouse. */
+const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
 /* Prima immagine di ogni categoria come anteprima hover.
    Viene letta in automatico da PROJECTS — non serve aggiornarla. */
 const PREVIEW = {};
@@ -423,9 +430,50 @@ window.addEventListener('touchmove',  e => {
     ty  = e.touches[0].clientY;
 }, { passive: true });
 
+/* ══════════════════════════════════════════════════════════════════
+   EVIDENZIAZIONE + PREVIEW SU MOBILE — voce più vicina al centro schermo
+   (equivalente dell'hover del mouse, ma pilotato dallo scroll)
+   ══════════════════════════════════════════════════════════════════ */
+let centerItemEl  = null;
+let centerCatSeen = null;
+
+function updateCenterItem() {
+    const viewportCenter = window.innerHeight / 2;
+    let closest = null;
+    let closestDist = Infinity;
+
+    const children = track.children;
+    for (let i = 0; i < children.length; i++) {
+        const el = children[i];
+        const rect = el.getBoundingClientRect();
+        const mid = rect.top + rect.height / 2;
+        const dist = Math.abs(mid - viewportCenter);
+        if (dist < closestDist) { closestDist = dist; closest = el; }
+    }
+
+    if (closest === centerItemEl) return; // nessun cambiamento rispetto al frame precedente
+
+    if (centerItemEl) centerItemEl.classList.remove('is-center');
+    centerItemEl = closest;
+
+    if (centerItemEl) {
+        centerItemEl.classList.add('is-center');
+        const cat = centerItemEl.dataset.cat;
+        if (cat && cat !== centerCatSeen) {
+            centerCatSeen = cat;
+            const src = PREVIEW[cat];
+            if (src) {
+                previewImg.src = src;
+                preview.classList.add('visible');
+            }
+        }
+    }
+}
+
 (function loop() {
     vs += (ts - vs) * 0.09;
     gsap.set(track, { y: -gsap.utils.wrap(0, LOOP_H, vs) });
+    if (isTouch) updateCenterItem();
     requestAnimationFrame(loop);
 })();
 
