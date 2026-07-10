@@ -25,15 +25,30 @@
             header.md\:hidden { display: flex !important; }
         }
 
+        /* ── Voci del menu mobile: dimensione in vmin, coerente in landscape ── */
+        .menu-item-title {
+            font-family: "aktiv-grotesk", sans-serif;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            line-height: 1;
+            font-size: 9vmin;
+        }
+        @media (max-height: 420px) {
+            .menu-item-title { font-size: 7vmin; }
+        }
+        #mobile-menu { overflow-y: auto; }
+
   .nav-active{color:#fff!important;}
   .scramble-char{display:inline-block;}
   body.is-dragging,body.is-dragging *{cursor:grabbing!important;}
 
   #canvas-wrap{position:fixed;inset:0;overflow:hidden;cursor:grab;}
   #canvas-wrap, #canvas, .g-tile{-webkit-user-select:none;user-select:none;-webkit-user-drag:none;}
-  /* touch-action: pan-x pan-y permette il pinch-zoom nativo del browser,
-     mentre il pan a un dito resta gestito dal nostro JS */
-  #canvas-wrap{touch-action: pan-x pan-y;}
+  /* touch-action:none — gestiamo NOI pan e pinch-zoom via JS (vedi script),
+     così il gesto a due dita ridimensiona davvero la griglia invece di
+     affidarsi (senza successo, con overflow:hidden sul contenitore) allo
+     zoom nativo del browser. */
+  #canvas-wrap{touch-action: none;}
   /* translate3d forza il layer GPU: fondamentale per fluidità durante drag/scroll */
   #canvas{position:absolute;top:0;left:0;will-change:transform;transform:translate3d(0,0,0);}
   .g-tile{
@@ -116,11 +131,11 @@
 
 <div id="mobile-menu" role="dialog" aria-modal="true"
     class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-start gap-3 opacity-0 pointer-events-none">
-    <a href="index.html"    data-nav="home"     class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">HOME</a>
-    <a href="projects.html" data-nav="projects" class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">PROJECTS</a>
-    <a href="gallery.html"  data-nav="gallery"  class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">GALLERY</a>
-    <a href="about.html"    data-nav="about"    class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">ABOUT</a>
-    <a href="contact.html"  data-nav="contact"  class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">CONTACT</a>
+    <a href="index.html"    data-nav="home"     class="menu-item-title text-white/30 hover:text-white transition-none">HOME</a>
+    <a href="projects.html" data-nav="projects" class="menu-item-title text-white/30 hover:text-white transition-none">PROJECTS</a>
+    <a href="gallery.html"  data-nav="gallery"  class="menu-item-title text-white/30 hover:text-white transition-none">GALLERY</a>
+    <a href="about.html"    data-nav="about"    class="menu-item-title text-white/30 hover:text-white transition-none">ABOUT</a>
+    <a href="contact.html"  data-nav="contact"  class="menu-item-title text-white/30 hover:text-white transition-none">CONTACT</a>
 </div>
 
 <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] text-white/30 text-xs tracking-widest uppercase flex items-center gap-2 animate-pulse pointer-events-none font-mono" id="hint">
@@ -265,7 +280,7 @@ const IMAGES=[
   'images/portraits/portraits-21.webp','images/portraits/portraits-22.webp',
   'images/portraits/portraits-23.webp','images/portraits/portraits-24.webp',
   'images/portraits/portraits-25.webp',
-  
+
   'images/fine-art/fine-art-01.webp','images/fine-art/fine-art-02.webp',
   'images/fine-art/fine-art-03.webp','images/fine-art/fine-art-04.webp',
   'images/fine-art/fine-art-05.webp','images/fine-art/fine-art-06.webp',

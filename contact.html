@@ -44,6 +44,19 @@
             header.md\:hidden { display: flex !important; }
         }
 
+        /* ── Voci del menu mobile: dimensione in vmin, coerente in landscape ── */
+        .menu-item-title {
+            font-family: "aktiv-grotesk", sans-serif;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            line-height: 1;
+            font-size: 9vmin;
+        }
+        @media (max-height: 420px) {
+            .menu-item-title { font-size: 7vmin; }
+        }
+        #mobile-menu { overflow-y: auto; }
+
 
 
 		.nav-active { color: #fff !important;}
@@ -104,11 +117,11 @@
 
 <div id="mobile-menu" role="dialog" aria-modal="true"
     class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-start gap-3 opacity-0 pointer-events-none">
-    <a href="index.html"    data-nav="home"     class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">HOME</a>
-    <a href="projects.html" data-nav="projects" class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">PROJECTS</a>
-    <a href="gallery.html"  data-nav="gallery"  class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">GALLERY</a>
-    <a href="about.html"    data-nav="about"    class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">ABOUT</a>
-    <a href="contact.html"  data-nav="contact"  class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">CONTACT</a>
+    <a href="index.html"    data-nav="home"     class="menu-item-title text-white/30 hover:text-white transition-none">HOME</a>
+    <a href="projects.html" data-nav="projects" class="menu-item-title text-white/30 hover:text-white transition-none">PROJECTS</a>
+    <a href="gallery.html"  data-nav="gallery"  class="menu-item-title text-white/30 hover:text-white transition-none">GALLERY</a>
+    <a href="about.html"    data-nav="about"    class="menu-item-title text-white/30 hover:text-white transition-none">ABOUT</a>
+    <a href="contact.html"  data-nav="contact"  class="menu-item-title text-white/30 hover:text-white transition-none">CONTACT</a>
 </div>
 
 <main class="font-title flex-1 flex justify-start items-end px-3 pt-24 md:pt-28 pb-3">

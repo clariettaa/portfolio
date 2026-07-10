@@ -48,6 +48,21 @@
         .scramble-char { display: inline-block; }
         .nav-active { color: #fff !important; }
 
+        /* ── Voci del menu mobile: dimensione in vmin, sempre coerente
+           sia in verticale che in orizzontale (sostituisce !text-[10vw]
+           che invece esplodeva in landscape) ── */
+        .menu-item-title {
+            font-family: "aktiv-grotesk", sans-serif;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            line-height: 1;
+            font-size: 9vmin;
+        }
+        @media (max-height: 420px) {
+            .menu-item-title { font-size: 7vmin; }
+        }
+        #mobile-menu { overflow-y: auto; }
+
         #hamburger span { transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s ease; }
         #hamburger.is-open span:nth-child(1) { transform: translateY(6px) rotate(45deg); background: #fff; }
         #hamburger.is-open span:nth-child(2) { opacity: 0; }
@@ -130,11 +145,11 @@
 
 <div id="mobile-menu" role="dialog" aria-modal="true"
 class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-start gap-3 opacity-0 pointer-events-none">
-<a href="index.html"    data-nav="home"     class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">HOME</a>
-<a href="projects.html" data-nav="projects" class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">PROJECTS</a>
-<a href="gallery.html"  data-nav="gallery"  class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">GALLERY</a>
-<a href="about.html"    data-nav="about"    class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">ABOUT</a>
-<a href="contact.html"  data-nav="contact"  class="font-title !text-[10vw] text-white/30 hover:text-white transition-none">CONTACT</a>
+<a href="index.html"    data-nav="home"     class="menu-item-title text-white/30 hover:text-white transition-none">HOME</a>
+<a href="projects.html" data-nav="projects" class="menu-item-title text-white/30 hover:text-white transition-none">PROJECTS</a>
+<a href="gallery.html"  data-nav="gallery"  class="menu-item-title text-white/30 hover:text-white transition-none">GALLERY</a>
+<a href="about.html"    data-nav="about"    class="menu-item-title text-white/30 hover:text-white transition-none">ABOUT</a>
+<a href="contact.html"  data-nav="contact"  class="menu-item-title text-white/30 hover:text-white transition-none">CONTACT</a>
 </div>
 
 <!-- ── Hero ── -->
@@ -277,8 +292,11 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
 
             const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
-            // Larghezza fissa in vw, altezza automatica per rispettare le proporzioni originali dell'immagine
-            const imgWidthVw = isTouch ? '55vw' : '25vw';
+            // Larghezza: su desktop resta in vw. Su touch usiamo vmin (si adatta
+            // alla dimensione PIÙ CORTA dello schermo, quindi in orizzontale
+            // si basa sull'altezza e non "esplode"), con un tetto massimo in px
+            // per non diventare comunque enorme su tablet in landscape.
+            const imgWidthVw = isTouch ? 'min(55vmin, 320px)' : '25vw';
 
             // Timing: su touch (mobile/tablet) comparsa più rapida e fluida, ma resta visibile 2s pieni
             const THROTTLE_MS   = isTouch ? 90   : 170;   // intervallo minimo tra due spawn
@@ -342,12 +360,11 @@ class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-st
             };
 
             if (isTouch) {
-                /* ── Touch/mobile: spawn automatico in posizioni casuali ── */
-                // Su mobile le immagini sono più grandi per essere visibili, altezza sempre automatica
-                pool.forEach(({ el }) => {
-                    el.style.width  = '55vw';
-                    el.style.height = 'auto';
-                });
+                /* ── Touch/mobile: spawn automatico in posizioni casuali ──
+                   (la larghezza è già impostata correttamente in fase di
+                   creazione del pool con min(55vmin,320px): qui non va
+                   più sovrascritta con un valore fisso in vw, altrimenti
+                   in orizzontale l'immagine torna a diventare enorme) ── */
 
                 const spawnRandom = () => {
                     // Margine per non uscire troppo dai bordi
