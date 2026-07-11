@@ -10,7 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollSmoother.min.js"></script>
     <style>
-        html, body { margin: 0px; background: black; color: white; }
+        html, body { margin: 0px; background: black; color: white; overscroll-behavior: none; }
 
         .font-title    { font-family: "aktiv-grotesk", sans-serif; font-weight: 400; font-size: 5vw; line-height: 1; letter-spacing: -0.02em; }
         .font-subtitle { font-family: "aktiv-grotesk", sans-serif; font-weight: 400; font-size: 1vw;   line-height: 1; letter-spacing: -0.01em; }
@@ -18,6 +18,21 @@
             .font-subtitle { font-size: 2vmin !important; }
             .font-title   { font-size: 10vmin !important;  }
         }
+
+        /* ── Voci del menu mobile: font dedicato, niente conflitti con
+           utility Tailwind !important che altrimenti vincerebbero sempre.
+           vmin si adatta correttamente sia in verticale che in orizzontale. ── */
+        .menu-item-title {
+            font-family: "aktiv-grotesk", sans-serif;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            line-height: 1;
+            font-size: 9vmin;
+        }
+        @media (max-height: 420px) {
+            .menu-item-title { font-size: 6vmin; }
+        }
+        #mobile-menu { overflow-y: auto; }
 
         /* ── Su dispositivi touch (telefoni/tablet), la navbar resta sempre
            quella mobile con hamburger, indipendentemente dall'orientamento ── */
@@ -182,11 +197,11 @@
 
 <div id="mobile-menu" role="dialog" aria-modal="true"
     class="hidden fixed inset-0 bg-black z-[10000] flex-col p-5 justify-end items-start gap-3 opacity-0 pointer-events-none">
-    <a href="index.html"    data-nav="home"     class="font-title text-[10vw] text-white/30 hover:text-white transition-none">HOME</a>
-    <a href="projects.html" data-nav="projects" class="font-title text-[10vw] text-white/30 hover:text-white transition-none">PROJECTS</a>
-    <a href="gallery.html"  data-nav="gallery"  class="font-title text-[10vw] text-white/30 hover:text-white transition-none">GALLERY</a>
-    <a href="about.html"    data-nav="about"    class="font-title text-[10vw] text-white/30 hover:text-white transition-none">ABOUT</a>
-    <a href="contact.html"  data-nav="contact"  class="font-title text-[10vw] text-white/30 hover:text-white transition-none">CONTACT</a>
+    <a href="index.html"    data-nav="home"     class="menu-item-title text-white/30 hover:text-white transition-none">HOME</a>
+    <a href="projects.html" data-nav="projects" class="menu-item-title text-white/30 hover:text-white transition-none">PROJECTS</a>
+    <a href="gallery.html"  data-nav="gallery"  class="menu-item-title text-white/30 hover:text-white transition-none">GALLERY</a>
+    <a href="about.html"    data-nav="about"    class="menu-item-title text-white/30 hover:text-white transition-none">ABOUT</a>
+    <a href="contact.html"  data-nav="contact"  class="menu-item-title text-white/30 hover:text-white transition-none">CONTACT</a>
 </div>
 
 <!-- ══════════════════════════════════════
@@ -426,9 +441,38 @@ let ty = 0;
 window.addEventListener('touchstart', e => { ty = e.touches[0].clientY; }, { passive: true });
 window.addEventListener('touchmove',  e => {
     if (scrollLock) return;
+    e.preventDefault(); // blocca il rimbalzo nativo mentre lo scroll infinito custom è attivo
     ts += (ty - e.touches[0].clientY) * 1.5;
     ty  = e.touches[0].clientY;
-}, { passive: true });
+}, { passive: false });
+
+/* ══════════════════════════════════════════════════════════════════
+   HOVER PREVIEW — istantanea, nessuna transition
+   IMPORTANTE: queste due const DEVONO essere dichiarate PRIMA del loop()
+   qui sotto. Il loop() si autoinvoca in modo SINCRONO alla sua stessa
+   definizione, e su touch chiama subito updateCenterItem(), che le usa.
+   Se preview/previewImg fossero dichiarate più sotto nel file, si otterrebbe
+   un ReferenceError ("Cannot access before initialization") che blocca
+   l'esecuzione di TUTTO il codice successivo dello script — inclusi hamburger,
+   lightbox e la registrazione stessa del loop ad ogni frame: è esattamente
+   il motivo per cui su mobile lo scroll infinito e il menu risultavano rotti.
+   ══════════════════════════════════════════════════════════════════ */
+const preview    = document.getElementById('hover-preview');
+const previewImg = document.getElementById('hover-preview-img');
+
+track.addEventListener('mouseover', e => {
+    const item = e.target.closest('.portfolio-item');
+    if (!item) return;
+    const src = PREVIEW[item.dataset.cat];
+    if (src) { previewImg.src = src; preview.classList.add('visible'); }
+});
+
+track.addEventListener('mouseout', e => {
+    const item = e.target.closest('.portfolio-item');
+    if (!item) return;
+    if (e.relatedTarget?.closest?.('.portfolio-item')) return;
+    preview.classList.remove('visible');
+});
 
 /* ══════════════════════════════════════════════════════════════════
    EVIDENZIAZIONE + PREVIEW SU MOBILE — voce più vicina al centro schermo
@@ -470,34 +514,28 @@ function updateCenterItem() {
     }
 }
 
+/* Throttle: senza questo, updateCenterItem() farebbe una lettura di layout
+   (getBoundingClientRect su ogni voce) subito dopo una scrittura di layout
+   (gsap.set sul transform) ad OGNI singolo frame — un classico "layout
+   thrashing" che forza un reflow sincrono continuo e rende lo scroll a
+   scatti/quasi bloccato su mobile. Aggiornare la voce centrata ~8 volte al
+   secondo è più che sufficiente ed elimina il problema. */
+let lastCenterCheck = 0;
+
 (function loop() {
     vs += (ts - vs) * 0.09;
     gsap.set(track, { y: -gsap.utils.wrap(0, LOOP_H, vs) });
-    if (isTouch) updateCenterItem();
+    if (isTouch) {
+        const now = performance.now();
+        if (now - lastCenterCheck > 120) {
+            lastCenterCheck = now;
+            updateCenterItem();
+        }
+    }
     requestAnimationFrame(loop);
 })();
 
 window.addEventListener('resize', () => { LOOP_H = loopH(); });
-
-/* ══════════════════════════════════════════════════════════════════
-   HOVER PREVIEW — istantanea, nessuna transition
-   ══════════════════════════════════════════════════════════════════ */
-const preview    = document.getElementById('hover-preview');
-const previewImg = document.getElementById('hover-preview-img');
-
-track.addEventListener('mouseover', e => {
-    const item = e.target.closest('.portfolio-item');
-    if (!item) return;
-    const src = PREVIEW[item.dataset.cat];
-    if (src) { previewImg.src = src; preview.classList.add('visible'); }
-});
-
-track.addEventListener('mouseout', e => {
-    const item = e.target.closest('.portfolio-item');
-    if (!item) return;
-    if (e.relatedTarget?.closest?.('.portfolio-item')) return;
-    preview.classList.remove('visible');
-});
 
 /* ══════════════════════════════════════════════════════════════════
    LIGHTBOX — apertura a schermo intero al click su un'immagine

@@ -36,6 +36,22 @@
             .font-title    { font-size: 15vmin !important; }
         }
 
+        /* ── Voci del menu mobile: font dedicato, niente conflitti con
+           utility Tailwind !important (es. !text-[10vw]) che altrimenti
+           vincerebbero sempre, ignorando qualunque fix vmin. vmin si adatta
+           correttamente sia in verticale che in orizzontale. ── */
+        .menu-item-title {
+            font-family: "aktiv-grotesk", sans-serif;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            line-height: 1;
+            font-size: 9vmin;
+        }
+        @media (max-height: 420px) {
+            .menu-item-title { font-size: 6vmin; } /* landscape molto basso */
+        }
+        #mobile-menu { overflow-y: auto; } /* se le voci non ci stanno in altezza, scrollano invece di sovrapporsi */
+
         /* ── Su dispositivi touch (telefoni/tablet), la navbar resta sempre
            quella mobile con hamburger, indipendentemente dall'orientamento:
            altrimenti in orizzontale la larghezza può superare il breakpoint
@@ -47,21 +63,6 @@
 
         .scramble-char { display: inline-block; }
         .nav-active { color: #fff !important; }
-
-        /* ── Voci del menu mobile: dimensione in vmin, sempre coerente
-           sia in verticale che in orizzontale (sostituisce !text-[10vw]
-           che invece esplodeva in landscape) ── */
-        .menu-item-title {
-            font-family: "aktiv-grotesk", sans-serif;
-            font-weight: 400;
-            letter-spacing: -0.02em;
-            line-height: 1;
-            font-size: 9vmin;
-        }
-        @media (max-height: 420px) {
-            .menu-item-title { font-size: 7vmin; }
-        }
-        #mobile-menu { overflow-y: auto; }
 
         #hamburger span { transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s ease; }
         #hamburger.is-open span:nth-child(1) { transform: translateY(6px) rotate(45deg); background: #fff; }

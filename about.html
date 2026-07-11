@@ -28,7 +28,9 @@
 			header.md\:hidden { display: flex !important; }
 		}
 
-		/* ── Voci del menu mobile: dimensione in vmin, coerente in landscape ── */
+		/* ── Voci del menu mobile: font dedicato, niente conflitti con
+		   utility Tailwind !important che altrimenti vincerebbero sempre.
+		   vmin si adatta correttamente sia in verticale che in orizzontale. ── */
 		.menu-item-title {
 			font-family: "aktiv-grotesk", sans-serif;
 			font-weight: 400;
@@ -37,7 +39,7 @@
 			font-size: 9vmin;
 		}
 		@media (max-height: 420px) {
-			.menu-item-title { font-size: 7vmin; }
+			.menu-item-title { font-size: 6vmin; }
 		}
 		#mobile-menu { overflow-y: auto; }
 

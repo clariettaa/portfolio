@@ -50,7 +50,7 @@
      zoom nativo del browser. */
   #canvas-wrap{touch-action: none;}
   /* translate3d forza il layer GPU: fondamentale per fluidità durante drag/scroll */
-  #canvas{position:absolute;top:0;left:0;will-change:transform;transform:translate3d(0,0,0);}
+  #canvas{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform;transform:translate3d(0,0,0);}
   .g-tile{
     position:absolute;
     overflow:hidden;
@@ -469,10 +469,12 @@ function makeTile(tx,ty){
   blocks.forEach((b,i)=>{
     const el=document.createElement('div');
     el.className='g-tile';
-    el.style.left  =ox+b.x+'px';
-    el.style.top   =oy+b.y+'px';
-    el.style.width =b.w+'px';
-    el.style.height=b.h+'px';
+    /* Math.round: evita micro-overlap/gap tra tile adiacenti causati da
+       arrotondamenti diversi che i browser applicano a coordinate frazionarie */
+    el.style.left  =Math.round(ox+b.x)+'px';
+    el.style.top   =Math.round(oy+b.y)+'px';
+    el.style.width =Math.round(b.w)+'px';
+    el.style.height=Math.round(b.h)+'px';
     el.style.zIndex=i;
     el.dataset.src=b.src;
     const img=document.createElement('img');
@@ -489,12 +491,18 @@ function killT(k){const e=tpool.get(k);if(e){e.forEach(n=>n.remove());tpool.dele
 
 function sync(){
   if(!ready)return;
-  const px=-camX+window.innerWidth/2;
-  const py=-camY+window.innerHeight/2;
+  /* Con lo zoom, la posizione "mondo" al centro schermo va calcolata
+     tenendo conto della scala (transform-origin è 0,0 su #canvas):
+     screenX = camX + worldX*scale  →  worldX = (screenCenterX - camX) / scale */
+  const px=(window.innerWidth /2 - camX) / camScale;
+  const py=(window.innerHeight/2 - camY) / camScale;
   const tx=Math.floor(px/TILE_W);
   const ty=Math.floor(py/TILE_H);
+  /* Zoomati indietro (camScale piccolo), lo schermo copre più "mondo":
+     serve un raggio di tile maggiore per non lasciare buchi vuoti ai bordi. */
+  const radius = Math.max(1, Math.ceil(1 / camScale));
   const need=new Set();
-  for(let dx=-1;dx<=1;dx++) for(let dy=-1;dy<=1;dy++) need.add(key(tx+dx,ty+dy));
+  for(let dx=-radius;dx<=radius;dx++) for(let dy=-radius;dy<=radius;dy++) need.add(key(tx+dx,ty+dy));
   for(const k of tpool.keys()) if(!need.has(k)) killT(k);
   for(const k of need) if(!tpool.has(k)){const[a,b]=k.split(',').map(Number);tpool.set(k,makeTile(a,b));}
 }
@@ -504,13 +512,46 @@ function sync(){
 let lastTx=null, lastTy=null;
 function syncIfNeeded(){
   if(!ready)return;
-  const px=-camX+window.innerWidth/2;
-  const py=-camY+window.innerHeight/2;
+  const px=(window.innerWidth /2 - camX) / camScale;
+  const py=(window.innerHeight/2 - camY) / camScale;
   const tx=Math.floor(px/TILE_W);
   const ty=Math.floor(py/TILE_H);
   if(tx===lastTx && ty===lastTy) return;
   lastTx=tx; lastTy=ty;
   sync();
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ZOOM — pinch a due dita (touch) e rotellina/trackpad con Ctrl/Cmd (desktop)
+   ══════════════════════════════════════════════════════════════════ */
+let camScale = 1;
+const MIN_SCALE = 0.35, MAX_SCALE = 3;
+let lastSyncScale = 1;
+
+function applyTransform(){
+  cvs.style.transform = `translate3d(${camX}px,${camY}px,0) scale(${camScale})`;
+  /* Dopo un cambio di scala consistente, forziamo un resync immediato:
+     a scale diverse serve un numero diverso di tile per coprire lo schermo
+     (vedi radius in sync()), altrimenti restano vuoti ai bordi o si
+     sovrappongono contenuti non necessari. */
+  if (Math.abs(camScale - lastSyncScale) > 0.12) {
+    lastSyncScale = camScale;
+    lastTx = lastTy = null;
+    sync();
+  }
+}
+
+/* Zoom "ancorato" a un punto dello schermo (cursore o centro del pinch):
+   il punto mondo che si trova sotto quel punto resta visivamente fermo
+   sotto di esso anche dopo il cambio di scala, invece di far "scappare"
+   la griglia da sotto le dita/cursore. */
+function zoomAt(ax, ay, newScale){
+  newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, newScale));
+  const factor = newScale / camScale;
+  camX = ax - (ax - camX) * factor;
+  camY = ay - (ay - camY) * factor;
+  camScale = newScale;
+  applyTransform();
 }
 
 function tick(){
@@ -522,7 +563,7 @@ function tick(){
     if(sp>0&&sp<MIND){const s=MIND/sp;dvx*=s;dvy*=s;}
   }
   syncIfNeeded();
-  cvs.style.transform=`translate3d(${camX}px,${camY}px,0)`;
+  applyTransform();
   requestAnimationFrame(tick);
 }
 
@@ -542,7 +583,8 @@ function up(){
 }
 
 let lastTouchTime=0;
-let isPinching=false; /* true mentre l'utente sta usando due (o più) dita per pizzicare lo zoom nativo */
+let isPinching=false; /* true mentre l'utente sta pizzicando con due dita per zoomare */
+let pinchStartDist=null, pinchStartScale=1, lastMidX=0, lastMidY=0;
 
 document.addEventListener('mousedown', e=>{
   if(Date.now()-lastTouchTime<800)return; /* ignora il "ghost click" dopo un touch */
@@ -557,11 +599,17 @@ document.addEventListener('mouseleave',up);
 wrap.addEventListener('touchstart', e=>{
   lastTouchTime=Date.now();
   if(e.touches.length>1){
-    /* Due o più dita: l'utente sta per pizzicare per zoomare.
-       Interrompiamo qualsiasi drag in corso e lasciamo che sia
-       il browser a gestire nativamente il pinch-zoom. */
+    /* Due dita: avvio dello zoom (pinch). Interrompiamo qualsiasi drag
+       a un dito in corso e prendiamo come riferimento la distanza e il
+       punto medio iniziale tra le due dita. */
     isPinching = true;
     if (drag) up();
+    const [a,b] = e.touches;
+    pinchStartDist  = Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY);
+    pinchStartScale = camScale;
+    lastMidX = (a.clientX+b.clientX)/2;
+    lastMidY = (a.clientY+b.clientY)/2;
+    hint.style.opacity='0';
     return;
   }
   isPinching = false;
@@ -571,34 +619,75 @@ wrap.addEventListener('touchstart', e=>{
 
 wrap.addEventListener('touchmove', e=>{
   lastTouchTime=Date.now();
-  if(e.touches.length>1 || isPinching){
-    /* Pinch in corso: NON blocchiamo l'evento (niente preventDefault),
-       così il browser può zoomare liberamente. Il nostro pan/drag
-       custom resta fermo finché l'utente non torna a un dito solo. */
+
+  if(e.touches.length>1){
+    /* Pinch-zoom a due dita: la distanza tra le dita determina la scala,
+       il punto medio determina sia il pan (se le dita si spostano insieme)
+       sia il punto di ancoraggio dello zoom. */
+    e.preventDefault();
+    const [a,b] = e.touches;
+    const dist = Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY);
+    const mx = (a.clientX+b.clientX)/2;
+    const my = (a.clientY+b.clientY)/2;
+
+    if (pinchStartDist) {
+      // pan dal movimento del punto medio
+      camX += (mx - lastMidX);
+      camY += (my - lastMidY);
+      // zoom ancorato al punto medio corrente
+      const newScale = pinchStartScale * (dist / pinchStartDist);
+      zoomAt(mx, my, newScale);
+    }
+    lastMidX = mx; lastMidY = my;
     return;
   }
+
+  if(isPinching){
+    /* Una sola dita rimasta ma arriviamo da un pinch: non facciamo pan
+       automaticamente in questo frame, aspettiamo touchend per resettare
+       lo stato in modo pulito (evita un salto improvviso della griglia). */
+    return;
+  }
+
   e.preventDefault();
   mv(e.touches[0].clientX,e.touches[0].clientY);
 },{passive:false});
 
 wrap.addEventListener('touchend', e=>{
   lastTouchTime=Date.now();
-  if(e.touches.length>0){
-    /* Restano ancora dita sullo schermo (fine pinch ma non fine gesto):
-       non facciamo scattare click/lightbox, aspettiamo che tutte le
-       dita vengano sollevate. */
+
+  if(e.touches.length===1 && isPinching){
+    /* Da due dita si è passati a una sola: riprendiamo il pan normale
+       da dove si trova ora l'unico dito rimasto, senza scatti. */
+    isPinching = false;
+    pinchStartDist = null;
+    const t=e.touches[0];
+    dn(t.clientX,t.clientY,t.target);
     return;
   }
+  if(e.touches.length>0) return; // altre dita ancora presenti, aspettiamo
+
   isPinching = false;
+  pinchStartDist = null;
   e.preventDefault();
   up();
 },{passive:false});
 
 /* ══ Scroll: si somma al drag, funziona in tutte le direzioni,
-   e l'infinito è già garantito dal wrap modulare di sync() ══ */
+   e l'infinito è già garantito dal wrap modulare di sync() ══
+   Ctrl/Cmd + rotellina, o pinch su trackpad (che il browser riporta come
+   wheel con ctrlKey=true): zoom invece di pan. ══ */
 wrap.addEventListener('wheel', e => {
   e.preventDefault();
   hint.style.opacity='0';
+
+  if (e.ctrlKey || e.metaKey) {
+    const newScale = camScale * (1 - e.deltaY * 0.01);
+    zoomAt(e.clientX, e.clientY, newScale);
+    dvx = dvy = 0;
+    return;
+  }
+
   camX -= e.deltaX * 0.9;
   camY -= e.deltaY * 0.9;
   dvx = dvy = 0; /* niente drift automatico mentre l'utente sta scrollando */
