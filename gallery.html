@@ -329,7 +329,7 @@ function build(){
   const colX=[];
   let sumX=0;
   for(let c=0;c<N;c++){colX.push(sumX);sumX+=cw[c]+gap;}
-  TILE_W=sumX;
+  TILE_W=Math.round(sumX);
 
   const pool=activeImages.map((src,i)=>({src,ratio:ratios[i]||1}));
   /* seed casuale ad ogni build: le immagini di categorie diverse
@@ -391,7 +391,7 @@ function build(){
     }
   }
 
-  TILE_H=maxH;
+  TILE_H=Math.round(maxH);
   ready=true;
 }
 
@@ -420,20 +420,60 @@ function preload(cb){
     loader.addEventListener('transitionend', () => loader.remove(), { once: true });
   };
 
-  let done=0;
-  const total=activeImages.length;
-  activeImages.forEach((src,i)=>{
-    const img=new Image();
-    const fin=()=>{
+  const total = activeImages.length;
+
+  /* ══ Caricamento a concorrenza limitata ══
+     Prima si scaricavano TUTTE le immagini contemporaneamente solo per
+     conoscerne le proporzioni reali: su mobile questo satura la connessione
+     e rallenta tutto. Ora se ne caricano solo MAX_CONCURRENT alla volta, e:
+     - la griglia diventa utilizzabile dopo le prime EARLY_REVEAL immagini
+       (non dopo tutte le ~90), quindi si vede e si usa molto prima
+     - il resto continua a caricare in background, aggiornando il mosaico
+       via via (rebuild parziali), non tutto in un unico salto alla fine ══ */
+  const MAX_CONCURRENT = 6;
+  const EARLY_REVEAL    = Math.min(28, total);
+
+  let done = 0;
+  let started = 0;
+  let earlyRevealed = false;
+  let nextRebuildAt = 12;
+
+  function loadOne(i){
+    const src = activeImages[i];
+    const img = new Image();
+    const fin = () => {
       done++;
-      if (counter) counter.textContent = String(Math.round((done / total) * 100));
-      if (done >= total) finishLoader();
-      if (done === total) rebuildKeepingCamera();
+      if (counter) counter.textContent = String(Math.round((done/total)*100));
+
+      if (!earlyRevealed && done >= EARLY_REVEAL) {
+        earlyRevealed = true;
+        finishLoader();
+        rebuildKeepingCameraPartial();
+      }
+      if (done >= nextRebuildAt && done < total) {
+        nextRebuildAt += 20; // aggiornamenti progressivi del mosaico, non solo alla fine
+        rebuildKeepingCameraPartial();
+      }
+      if (done >= total) {
+        if (!earlyRevealed) finishLoader();
+        rebuildKeepingCamera(); // solo qui, a caricamento TOTALE finito, si scartano le eventuali immagini fallite
+      }
+
+      startNext();
     };
-    img.onload=()=>{ratios[i]=(img.naturalWidth||1)/(img.naturalHeight||1);fin();};
-    img.onerror=()=>{ratios[i]=0;fin();};
-    img.src=src;
-  });
+    img.onload  = () => { ratios[i] = (img.naturalWidth||1)/(img.naturalHeight||1); fin(); };
+    img.onerror = () => { ratios[i] = 0; fin(); };
+    img.src = src;
+  }
+
+  function startNext(){
+    if (started >= total) return;
+    const i = started++;
+    loadOne(i);
+  }
+
+  const firstBatch = Math.min(MAX_CONCURRENT, total);
+  for (let k = 0; k < firstBatch; k++) startNext();
 }
 
 function pruneMissingImages(){
@@ -449,12 +489,28 @@ function pruneMissingImages(){
   ratios = keptRatios;
 }
 
+/* Rebuild "leggero" usato DURANTE il caricamento: NON scarta mai immagini
+   (niente pruneMissingImages), perché il caricamento a coda usa ancora gli
+   indici originali — scartare elementi a metà caricamento sfaserebbe gli
+   indici e assocerebbe le proporzioni alle foto sbagliate. Lo scarto delle
+   immagini eventualmente fallite avviene solo a caricamento totale concluso,
+   dentro rebuildKeepingCamera(). */
+function rebuildKeepingCameraPartial(){
+  const relX=camX, relY=camY;
+  [...tpool.keys()].forEach(killT);
+  build();
+  camX=relX; camY=relY;
+  lastTx=lastTy=null;
+  sync();
+}
+
 function rebuildKeepingCamera(){
   const relX=camX, relY=camY;
   [...tpool.keys()].forEach(killT);
   pruneMissingImages();
   build();
   camX=relX; camY=relY;
+  lastTx=lastTy=null;
   sync();
 }
 
