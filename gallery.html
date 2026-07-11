@@ -62,7 +62,14 @@
 
   #lightbox{position:fixed;inset:0;z-index:8000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0);opacity:0;pointer-events:none;transition:background .4s,opacity .4s;}
   #lightbox.is-open{background:rgba(0,0,0,.95);opacity:1;pointer-events:auto;}
-  #lightbox img{max-width:90vw;max-height:90vh;object-fit:contain;transform:scale(.92);transition:transform .4s cubic-bezier(.22,1,.36,1);touch-action:pinch-zoom;}
+  /* touch-action:none sul lightbox e sulla sua immagine: mentre una foto è
+     aperta a schermo intero, NESSUN tipo di zoom deve essere possibile
+     (né quello nativo del browser, né quello custom della griglia) —
+     altrimenti lo zoom nativo del browser resta "appiccicato" a livello di
+     pagina anche dopo aver chiuso il lightbox, disallineandosi dal nostro
+     zoom JS della griglia sottostante. */
+  #lightbox{touch-action:none;}
+  #lightbox img{max-width:90vw;max-height:90vh;object-fit:contain;transform:scale(.92);transition:transform .4s cubic-bezier(.22,1,.36,1);touch-action:none;}
   #lightbox.is-open img{transform:scale(1);}
 
   /* hamburger */
@@ -592,6 +599,7 @@ let pinchStartDist=null, pinchStartScale=1, lastMidX=0, lastMidY=0;
 
 document.addEventListener('mousedown', e=>{
   if(Date.now()-lastTouchTime<800)return; /* ignora il "ghost click" dopo un touch */
+  if(lb.classList.contains('is-open'))return; // lightbox aperto: niente pan della griglia
   e.preventDefault();dn(e.clientX,e.clientY,e.target);
 });
 document.addEventListener('dragstart', e=>e.preventDefault());
@@ -602,6 +610,7 @@ document.addEventListener('mouseleave',up);
 
 wrap.addEventListener('touchstart', e=>{
   lastTouchTime=Date.now();
+  if (lb.classList.contains('is-open')) return; // lightbox aperto: nessun gesto sulla griglia sottostante
   if(e.touches.length>1){
     /* Due dita: avvio dello zoom (pinch). Interrompiamo qualsiasi drag
        a un dito in corso e prendiamo come riferimento la distanza e il
@@ -627,6 +636,7 @@ wrap.addEventListener('touchstart', e=>{
 
 wrap.addEventListener('touchmove', e=>{
   lastTouchTime=Date.now();
+  if (lb.classList.contains('is-open')) return; // lightbox aperto: nessun gesto sulla griglia
 
   if(e.touches.length>1){
     /* Pinch-zoom a due dita: la distanza tra le dita determina la scala,
@@ -690,6 +700,7 @@ wrap.addEventListener('touchend', e=>{
    Ctrl/Cmd + rotellina, o pinch su trackpad (che il browser riporta come
    wheel con ctrlKey=true): zoom invece di pan. ══ */
 wrap.addEventListener('wheel', e => {
+  if (lb.classList.contains('is-open')) return; // lightbox aperto: niente zoom/pan sulla griglia
   e.preventDefault();
   hint.style.opacity='0';
 
