@@ -58,7 +58,12 @@
         #smooth-content { width: 100%; }
 
         /* ── Vista 1: scroll infinito ── */
-        #loop-wrap  { position: relative; width: 100%; height: 100vh; overflow: hidden; }
+        /* z-index: 5 crea qui uno stacking context "atomico" — garantisce che
+           TUTTO il contenuto di #loop-wrap (la lista testi) resti sempre sopra
+           a #hover-preview (z-index:1), sia su desktop che su mobile, invece
+           di affidarsi ai soli z-index individuali dei singoli elementi
+           (stesso identico fix già usato per #hero nella home page). */
+        #loop-wrap  { position: relative; z-index: 5; width: 100%; height: 100vh; overflow: hidden; }
         #loop-track { position: absolute; top: 0; left: 0; width: 100%; will-change: transform; }
 
         .portfolio-item {

@@ -578,12 +578,16 @@ function mv(x,y){
 function up(){
   if(!drag)return;
   drag=false;document.body.classList.remove('is-dragging');
-  if(tot<6&&dtgt){const t=dtgt.closest?.('.g-tile');if(t)tgl(t.dataset.src);}
+  /* recentlyPinched: se il gesto arrivava da un pinch a due dita, NON deve
+     mai aprire l'immagine sotto il dito rimasto, anche se il movimento
+     residuo è minimo — altrimenti terminare uno zoom equivale a un "tap". */
+  if(tot<6&&dtgt&&!recentlyPinched){const t=dtgt.closest?.('.g-tile');if(t)tgl(t.dataset.src);}
   if(Math.hypot(uvx,uvy)>MIND){dvx=uvx;dvy=uvy;}
 }
 
 let lastTouchTime=0;
 let isPinching=false; /* true mentre l'utente sta pizzicando con due dita per zoomare */
+let recentlyPinched=false; /* resta true per l'intera durata del gesto dopo un pinch */
 let pinchStartDist=null, pinchStartScale=1, lastMidX=0, lastMidY=0;
 
 document.addEventListener('mousedown', e=>{
@@ -603,6 +607,7 @@ wrap.addEventListener('touchstart', e=>{
        a un dito in corso e prendiamo come riferimento la distanza e il
        punto medio iniziale tra le due dita. */
     isPinching = true;
+    recentlyPinched = true;
     if (drag) up();
     const [a,b] = e.touches;
     pinchStartDist  = Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY);
@@ -612,7 +617,10 @@ wrap.addEventListener('touchstart', e=>{
     hint.style.opacity='0';
     return;
   }
+  /* Un solo dito e nessun altro presente: gesto genuinamente nuovo,
+     resettiamo il flag del pinch precedente. */
   isPinching = false;
+  recentlyPinched = false;
   const t=e.touches[0];
   dn(t.clientX,t.clientY,t.target);
 },{passive:true});
@@ -658,7 +666,9 @@ wrap.addEventListener('touchend', e=>{
 
   if(e.touches.length===1 && isPinching){
     /* Da due dita si è passati a una sola: riprendiamo il pan normale
-       da dove si trova ora l'unico dito rimasto, senza scatti. */
+       da dove si trova ora l'unico dito rimasto, senza scatti — ma il
+       flag recentlyPinched resta attivo, quindi il rilascio finale di
+       questo stesso dito non aprirà mai un'immagine per errore. */
     isPinching = false;
     pinchStartDist = null;
     const t=e.touches[0];
@@ -671,7 +681,9 @@ wrap.addEventListener('touchend', e=>{
   pinchStartDist = null;
   e.preventDefault();
   up();
+  recentlyPinched = false; // gesto concluso del tutto: da qui riparte pulito
 },{passive:false});
+
 
 /* ══ Scroll: si somma al drag, funziona in tutte le direzioni,
    e l'infinito è già garantito dal wrap modulare di sync() ══
@@ -706,14 +718,23 @@ lb.addEventListener('touchend',e=>{
    (es. dopo aver premuto "indietro" nel browser): senza questo,
    il lightbox e lo stato di drag potrebbero restare "congelati"
    aperti/attivi così come erano prima di lasciare la pagina. ══ */
+function resetGalleryState() {
+  lb.classList.remove('is-open');
+  isPinching = false;
+  recentlyPinched = false;
+  pinchStartDist = null;
+  if (drag) up();
+  document.body.classList.remove('is-dragging');
+}
+
 window.addEventListener('pageshow', (e) => {
-  if (e.persisted) {
-    lb.classList.remove('is-open');
-    isPinching = false;
-    if (drag) up();
-    document.body.classList.remove('is-dragging');
-  }
+  if (e.persisted) resetGalleryState();
 });
+
+/* Rete di sicurezza extra: se in futuro si aggiunge navigazione con
+   history.pushState (come già avviene in projects.html), "indietro"
+   deve comunque chiudere il lightbox invece di lasciarlo aperto. */
+window.addEventListener('popstate', resetGalleryState);
 
 /* Se la scheda torna visibile (es. cambio app su mobile e poi ritorno)
    assicuriamoci che il lightbox non resti bloccato in uno stato strano */
